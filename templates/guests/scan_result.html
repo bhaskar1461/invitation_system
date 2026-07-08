@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        
+        <!-- Result Card -->
+        {% if status == 'success' %}
+        <div class="card border-left-success p-4 mb-4">
+            <div class="text-center py-4">
+                <div class="mb-3">
+                    <i class="bi bi-check-circle-fill text-success" style="font-size: 4.5rem; filter: drop-shadow(0 8px 16px rgba(20, 122, 77, 0.15));"></i>
+                </div>
+                <h2 class="fw-bold text-success mb-1">Access Granted</h2>
+                <p class="text-muted">Welcome to Sreenidhi University Founder's Day</p>
+                <span class="badge bg-success fs-6 py-2 px-3 mb-4">Checked In</span>
+            </div>
+            
+            <div class="border-top pt-4">
+                <h5 class="mb-3"><i class="bi bi-person-card-heading me-2"></i>Guest Information</h5>
+                <div class="table-responsive">
+                    <table class="table table-borderless align-middle mb-0">
+                        <tbody>
+                            <tr>
+                                <th class="ps-0 text-muted fw-normal" style="width: 35%;">Guest Name:</th>
+                                <td class="fw-bold text-dark">{{ guest.guest_name }}</td>
+                            </tr>
+                            {% if guest.rollno %}
+                            <tr>
+                                <th class="ps-0 text-muted fw-normal">Roll Number:</th>
+                                <td><code>{{ guest.rollno }}</code></td>
+                            </tr>
+                            {% endif %}
+                            {% if guest.mobile %}
+                            <tr>
+                                <th class="ps-0 text-muted fw-normal">Contact Mobile:</th>
+                                <td>{{ guest.mobile }}</td>
+                            </tr>
+                            {% endif %}
+                            <tr>
+                                <th class="ps-0 text-muted fw-normal">Email Address:</th>
+                                <td>{{ guest.email }}</td>
+                            </tr>
+                            <tr>
+                                <th class="ps-0 text-muted fw-normal">Verification Code:</th>
+                                <td><code class="fs-6">{{ guest.qr_code }}</code></td>
+                            </tr>
+                            <tr>
+                                <th class="ps-0 text-muted fw-normal">Check-in Time:</th>
+                                <td>{{ guest.scanned_at.strftime('%Y-%m-%d %H:%M:%S UTC') if guest.scanned_at else 'Just now' }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {% elif status == 'already_scanned' %}
+        <div class="card border-left-warning p-4 mb-4">
+            <div class="text-center py-4">
+                <div class="mb-3">
+                    <i class="bi bi-exclamation-triangle-fill text-warning" style="font-size: 4.5rem; filter: drop-shadow(0 8px 16px rgba(234, 179, 8, 0.15));"></i>
+                </div>
+                <h2 class="fw-bold text-warning mb-1">Duplicate Pass Warning</h2>
+                <p class="text-muted">This entry pass has already been processed</p>
+                <span class="badge bg-warning text-dark fs-6 py-2 px-3 mb-4">Already Scanned</span>
+            </div>
+
+            <div class="alert alert-warning border-0 p-3 mb-4">
+                <div class="d-flex">
+                    <i class="bi bi-info-circle-fill fs-4 me-2"></i>
+                    <div>
+                        <h6 class="fw-bold mb-1">Security Notice</h6>
+                        <span>This pass was previously scanned on <strong>{{ guest.scanned_at.strftime('%Y-%m-%d %H:%M:%S UTC') if guest.scanned_at else 'unknown time' }}</strong>. Duplicate entry attempts should be checked by security team.</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-top pt-4">
+                <h5 class="mb-3"><i class="bi bi-person-card-heading me-2"></i>Registered Holder</h5>
+                <div class="table-responsive">
+                    <table class="table table-borderless align-middle mb-0">
+                        <tbody>
+                            <tr>
+                                <th class="ps-0 text-muted fw-normal" style="width: 35%;">Guest Name:</th>
+                                <td class="fw-bold text-dark">{{ guest.guest_name }}</td>
+                            </tr>
+                            {% if guest.rollno %}
+                            <tr>
+                                <th class="ps-0 text-muted fw-normal">Roll Number:</th>
+                                <td><code>{{ guest.rollno }}</code></td>
+                            </tr>
+                            {% endif %}
+                            <tr>
+                                <th class="ps-0 text-muted fw-normal">Email Address:</th>
+                                <td>{{ guest.email }}</td>
+                            </tr>
+                            <tr>
+                                <th class="ps-0 text-muted fw-normal">Verification Code:</th>
+                                <td><code class="fs-6">{{ guest.qr_code }}</code></td>
+                            </tr>
+                            {% if guest.device_ip %}
+                            <tr>
+                                <th class="ps-0 text-muted fw-normal">Scanner IP:</th>
+                                <td><small class="text-muted">{{ guest.device_ip }}</small></td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {% elif status == 'invalid' %}
+        <div class="card border-left-danger p-4 mb-4">
+            <div class="text-center py-4">
+                <div class="mb-3">
+                    <i class="bi bi-x-circle-fill text-danger" style="font-size: 4.5rem; filter: drop-shadow(0 8px 16px rgba(178, 58, 84, 0.15));"></i>
+                </div>
+                <h2 class="fw-bold text-danger mb-1">Invalid QR Code</h2>
+                <p class="text-muted">Ticket verification failed</p>
+                <span class="badge bg-danger fs-6 py-2 px-3 mb-4">Access Denied</span>
+            </div>
+
+            <div class="alert alert-danger border-0 p-3 mb-0">
+                <div class="d-flex">
+                    <i class="bi bi-shield-slash-fill fs-4 me-2"></i>
+                    <div>
+                        <h6 class="fw-bold mb-1">Verification Error</h6>
+                        <span>The scanned code <strong>{{ qr_code }}</strong> does not exist in the guest invitation database. Please inspect the physical pass or try manually entering their name in the directory.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Navigation Actions -->
+        <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center mt-3">
+            <a href="{{ url_for('dashboard.index') }}" class="btn btn-primary py-2 px-4">
+                <i class="bi bi-speedometer2 me-2"></i>Dashboard
+            </a>
+            <a href="{{ url_for('guests.index') }}" class="btn btn-outline-secondary py-2 px-4">
+                <i class="bi bi-people me-2"></i>View Guests Directory
+            </a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

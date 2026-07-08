@@ -28,7 +28,7 @@ def send_single(guest_id):
 def send_pending():
     form = EmptyForm()
     if form.validate_on_submit():
-        pending_guests = Guest.query.filter_by(email_status='Pending').all()
+        pending_guests = Guest.query.filter(Guest.invite_sent == False, Guest.remarks.is_(None)).all()
         if not pending_guests:
             flash("No pending invitations to send.", "info")
             return redirect(request.referrer or url_for('guests.index'))
@@ -54,7 +54,7 @@ def send_pending():
 def retry_failed():
     form = EmptyForm()
     if form.validate_on_submit():
-        failed_guests = Guest.query.filter_by(email_status='Failed').all()
+        failed_guests = Guest.query.filter(Guest.invite_sent == False, Guest.remarks.is_not(None)).all()
         if not failed_guests:
             flash("No failed invitations to retry.", "info")
             return redirect(request.referrer or url_for('guests.index'))

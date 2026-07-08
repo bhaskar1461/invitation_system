@@ -97,14 +97,14 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for log, guest in failed_logs %}
+                                {% for guest in failed_logs %}
                                     <tr>
                                         <td><strong>{{ guest.guest_name }}</strong></td>
                                         <td><small>{{ guest.email }}</small></td>
-                                        <td><small class="text-muted">{{ log.sent_at.strftime('%Y-%m-%d %H:%M:%S') }}</small></td>
+                                        <td><small class="text-muted">{{ guest.updated_at.strftime('%Y-%m-%d %H:%M:%S') if guest.updated_at else 'N/A' }}</small></td>
                                         <td>
                                             <div class="text-danger border-start border-3 border-danger ps-2 py-1" style="font-family: monospace; font-size: 13px;">
-                                                {{ log.error_message or 'Unknown SMTP Transmission Failure' }}
+                                                {{ guest.last_email_error or 'Unknown SMTP Transmission Failure' }}
                                             </div>
                                         </td>
                                     </tr>

@@ -41,25 +41,16 @@ class GuestService:
         # Generate QR code poster overlay path
         qr_image_path = BarcodeService.generate_barcode(code)
 
-        # Audit / User session extraction
-        from flask import has_request_context
-        from flask_login import current_user
-        created_by_id = None
-        if has_request_context() and current_user and current_user.is_authenticated:
-            created_by_id = current_user.id
-
         # Create Guest in event_qr_codes table
         guest = Guest(
             guest_name=name.strip(),
-            rollno=rollno.strip() if rollno else None,
-            mobile=mobile.strip() if mobile else None,
+            rollno=rollno.strip() if rollno else "",
+            mobile=mobile.strip() if mobile else "",
             email=email,
             qr_code=code,
             qr_image=qr_image_path,
             invite_sent=False,
-            status='Pending',
-            email_status='Pending',
-            created_by=created_by_id
+            status='ACTIVE'
         )
         db.session.add(guest)
         db.session.commit()
@@ -87,18 +78,10 @@ class GuestService:
         if existing:
             raise ValueError(f"Another guest with email {email} already exists.")
 
-        # Audit / User session extraction
-        from flask import has_request_context
-        from flask_login import current_user
-        updated_by_id = None
-        if has_request_context() and current_user and current_user.is_authenticated:
-            updated_by_id = current_user.id
-
         guest.guest_name = name.strip()
         guest.email = email
-        guest.rollno = rollno.strip() if rollno else None
-        guest.mobile = mobile.strip() if mobile else None
-        guest.updated_by = updated_by_id
+        guest.rollno = rollno.strip() if rollno else ""
+        guest.mobile = mobile.strip() if mobile else ""
         
         db.session.commit()
         return guest
@@ -148,16 +131,8 @@ class GuestService:
         new_code = GuestService.generate_unique_code()
         qr_image_path = BarcodeService.generate_barcode(new_code)
 
-        # Audit / User session extraction
-        from flask import has_request_context
-        from flask_login import current_user
-        updated_by_id = None
-        if has_request_context() and current_user and current_user.is_authenticated:
-            updated_by_id = current_user.id
-
         guest.qr_code = new_code
         guest.qr_image = qr_image_path
-        guest.updated_by = updated_by_id
         
         db.session.commit()
         return guest

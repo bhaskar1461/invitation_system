@@ -9,7 +9,6 @@ from flask import current_app, render_template
 
 from models import db
 from models.guest import Guest
-from models.email_log import EmailLog
 
 class EmailService:
     @staticmethod
@@ -50,10 +49,10 @@ class EmailService:
             recipient = guest.email
             subject = f"Official Invitation: Sreenidhi University Founder's Day"
 
-            # 0. Generate or regenerate QR code containing only the unique verification code
+            # 0. Generate or regenerate QR code containing the unique 6-digit code
             try:
                 from services.barcode_service import BarcodeService
-                # This will overlay the QR code containing guest.qr_code onto the template poster
+                # This will overlay the QR code containing the 6-digit code onto the template poster
                 qr_image_path = BarcodeService.generate_barcode(guest.qr_code)
                 guest.qr_image = qr_image_path
                 db.session.commit()
@@ -168,21 +167,12 @@ class EmailService:
         """
         Helper method to log sending status to database and update tracking columns.
         """
-        guest.email_status = status
-        guest.email_retry_count = (guest.email_retry_count or 0) + 1
-        
         if status == 'Sent':
             guest.invite_sent = True
-            guest.email_sent_at = datetime.utcnow()
-            guest.last_email_error = None
+            guest.status = 'ACTIVE'
+            guest.remarks = None
         else:
-            guest.last_email_error = error_message
+            guest.invite_sent = False
+            guest.remarks = error_message
             
-        log = EmailLog(
-            guest_id=guest.id,
-            sent_at=datetime.utcnow(),
-            status=status,
-            error_message=error_message
-        )
-        db.session.add(log)
         db.session.commit()

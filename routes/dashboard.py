@@ -4,7 +4,6 @@ from datetime import datetime, timedelta
 
 from models import db
 from models.guest import Guest
-from models.email_log import EmailLog
 from forms import EmptyForm
 
 dashboard_bp = Blueprint('dashboard', __name__)
@@ -14,9 +13,9 @@ dashboard_bp = Blueprint('dashboard', __name__)
 def index():
     # Calculate stats
     total_guests = Guest.query.count()
-    sent_count = Guest.query.filter_by(email_status='Sent').count()
-    pending_count = Guest.query.filter_by(email_status='Pending').count()
-    failed_count = Guest.query.filter_by(email_status='Failed').count()
+    sent_count = Guest.query.filter_by(invite_sent=True).count()
+    pending_count = Guest.query.filter(Guest.invite_sent == False, Guest.remarks == None).count()
+    failed_count = Guest.query.filter(Guest.invite_sent == False, Guest.remarks != None).count()
     scanned_count = Guest.query.filter_by(is_scanned=True).count()
 
     # Time-based stats
@@ -50,9 +49,9 @@ def index():
 def reports():
     # Fetch general statistics
     total_guests = Guest.query.count()
-    sent_count = Guest.query.filter_by(email_status='Sent').count()
-    pending_count = Guest.query.filter_by(email_status='Pending').count()
-    failed_count = Guest.query.filter_by(email_status='Failed').count()
+    sent_count = Guest.query.filter_by(invite_sent=True).count()
+    pending_count = Guest.query.filter(Guest.invite_sent == False, Guest.remarks == None).count()
+    failed_count = Guest.query.filter(Guest.invite_sent == False, Guest.remarks != None).count()
 
     now = datetime.utcnow()
     today_start = datetime(now.year, now.month, now.day)
@@ -61,8 +60,8 @@ def reports():
     added_today = Guest.query.filter(Guest.created_at >= today_start).count()
     added_this_week = Guest.query.filter(Guest.created_at >= week_start).count()
 
-    # Fetch last 15 failed email logs with guest details
-    failed_logs = db.session.query(EmailLog, Guest).join(Guest).filter(EmailLog.status == 'Failed').order_by(EmailLog.sent_at.desc()).limit(15).all()
+    # Fetch last 15 failed email logs
+    failed_logs = Guest.query.filter(Guest.invite_sent == False, Guest.remarks != None).order_by(Guest.updated_at.desc()).limit(15).all()
     
     # Calculate percentages
     delivery_rate = 0.0
@@ -80,3 +79,24 @@ def reports():
         failed_logs=failed_logs,
         delivery_rate=delivery_rate
     )
+
+@dashboard_bp.route('/scan/<string:qr_code>')
+@login_required
+def scan_verify(qr_code):
+    guest = Guest.query.filter_by(qr_code=qr_code).first()
+    if not guest:
+        return render_template('guests/scan_result.html', status='invalid', qr_code=qr_code), 404
+        
+    if guest.is_scanned:
+        return render_template('guests/scan_result.html', status='already_scanned', guest=guest)
+    
+    # Mark as scanned
+    guest.is_scanned = True
+    guest.scanned_at = datetime.utcnow()
+    guest.last_scanned_at = datetime.utcnow()
+    guest.device_ip = request.remote_addr
+    guest.device_id = request.headers.get('User-Agent', '')[:100]
+    db.session.commit()
+    
+    return render_template('guests/scan_result.html', status='success', guest=guest)
+

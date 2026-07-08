@@ -25,8 +25,12 @@ def index():
         query = query.filter((Guest.guest_name.ilike(f"%{search}%")) | (Guest.email.ilike(f"%{search}%")) | (Guest.qr_code.ilike(f"%{search}%")))
         
     # Apply status filter
-    if status in ['Pending', 'Sent', 'Failed']:
-        query = query.filter(Guest.email_status == status)
+    if status == 'Sent':
+        query = query.filter(Guest.invite_sent == True)
+    elif status == 'Failed':
+        query = query.filter(Guest.invite_sent == False, Guest.remarks.is_not(None))
+    elif status == 'Pending':
+        query = query.filter(Guest.invite_sent == False, Guest.remarks.is_(None))
         
     # Apply sorting
     if sort_by == 'name':
@@ -36,7 +40,7 @@ def index():
     elif sort_by == 'code':
         order_col = Guest.qr_code
     elif sort_by == 'status':
-        order_col = Guest.email_status
+        order_col = Guest.invite_sent
     else:
         order_col = Guest.created_at
         

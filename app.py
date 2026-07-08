@@ -26,6 +26,13 @@ def create_app(config_class=Config):
     login_manager.init_app(app)
     csrf.init_app(app)
 
+    # Automatically create missing database tables on startup
+    with app.app_context():
+        try:
+            db.create_all()
+        except Exception as e:
+            app.logger.error(f"Error during db.create_all() on startup: {str(e)}")
+
     # Configure login manager
     login_manager.login_view = 'auth.login'
     login_manager.login_message_category = 'warning'
