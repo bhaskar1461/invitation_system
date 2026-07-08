@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col-sm-6">
+        <h2 class="h3 mb-0 text-gray-800"><i class="bi bi-people-fill text-primary me-2"></i>Guest Invitation Records</h2>
+        <p class="text-muted mb-0">Search, manage details, view barcodes, and trigger email dispatches.</p>
+    </div>
+    <div class="col-sm-6 text-sm-end mt-3 mt-sm-0">
+        <a href="{{ url_for('guests.add') }}" class="btn btn-primary me-2"><i class="bi bi-person-plus-fill me-1"></i> Add Guest</a>
+        <a href="{{ url_for('upload.index') }}" class="btn btn-success"><i class="bi bi-file-earmark-excel-fill me-1"></i> Import Excel</a>
+    </div>
+</div>
+
+<!-- Search and Filter Bar -->
+<div class="filter-bar shadow-sm">
+    <form method="GET" action="{{ url_for('guests.index') }}" class="row g-3">
+        <input type="hidden" name="sort_by" value="{{ sort_by }}">
+        <input type="hidden" name="sort_dir" value="{{ sort_dir }}">
+        
+        <div class="col-md-5">
+            <div class="input-group">
+                <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-secondary"></i></span>
+                <input type="text" name="search" class="form-control border-start-0" placeholder="Search by name, email, or code..." value="{{ search }}">
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <select name="status" class="form-select">
+                <option value="">All Delivery Statuses</option>
+                <option value="Pending" {% if status == 'Pending' %}selected{% endif %}>Pending</option>
+                <option value="Sent" {% if status == 'Sent' %}selected{% endif %}>Sent</option>
+                <option value="Failed" {% if status == 'Failed' %}selected{% endif %}>Failed</option>
+            </select>
+        </div>
+        
+        <div class="col-md-4 d-flex gap-2">
+            <button type="submit" class="btn btn-primary px-4 w-50">Filter</button>
+            <a href="{{ url_for('guests.index') }}" class="btn btn-outline-secondary px-3 w-50">Clear Filters</a>
+        </div>
+    </form>
+</div>
+
+<!-- Table Card -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body p-0">
+        {% if guests %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Guest ID</th>
+                            <th>
+                                <a href="{{ url_for('guests.index', search=search, status=status, sort_by='name', sort_dir='desc' if sort_by == 'name' and sort_dir == 'asc' else 'asc') }}" class="text-dark text-decoration-none">
+                                    Name 
+                                    {% if sort_by == 'name' %}
+                                        <i class="bi bi-sort-alpha-{{ 'down' if sort_dir == 'asc' else 'up' }} text-primary"></i>
+                                    {% else %}
+                                        <i class="bi bi-arrow-down-up text-muted small"></i>
+                                    {% endif %}
+                                </a>
+                            </th>
+                            <th>
+                                <a href="{{ url_for('guests.index', search=search, status=status, sort_by='email', sort_dir='desc' if sort_by == 'email' and sort_dir == 'asc' else 'asc') }}" class="text-dark text-decoration-none">
+                                    Email 
+                                    {% if sort_by == 'email' %}
+                                        <i class="bi bi-sort-alpha-{{ 'down' if sort_dir == 'asc' else 'up' }} text-primary"></i>
+                                    {% else %}
+                                        <i class="bi bi-arrow-down-up text-muted small"></i>
+                                    {% endif %}
+                                </a>
+                            </th>
+                            <th>
+                                <a href="{{ url_for('guests.index', search=search, status=status, sort_by='code', sort_dir='desc' if sort_by == 'code' and sort_dir == 'asc' else 'asc') }}" class="text-dark text-decoration-none">
+                                    Invitation Code 
+                                    {% if sort_by == 'code' %}
+                                        <i class="bi bi-sort-numeric-{{ 'down' if sort_dir == 'asc' else 'up' }} text-primary"></i>
+                                    {% else %}
+                                        <i class="bi bi-arrow-down-up text-muted small"></i>
+                                    {% endif %}
+                                </a>
+                            </th>
+                            <th>
+                                <a href="{{ url_for('guests.index', search=search, status=status, sort_by='status', sort_dir='desc' if sort_by == 'status' and sort_dir == 'asc' else 'asc') }}" class="text-dark text-decoration-none">
+                                    Delivery Status 
+                                    {% if sort_by == 'status' %}
+                                        <i class="bi bi-sort-alpha-{{ 'down' if sort_dir == 'asc' else 'up' }} text-primary"></i>
+                                    {% else %}
+                                        <i class="bi bi-arrow-down-up text-muted small"></i>
+                                    {% endif %}
+                                </a>
+                            </th>
+                            <th>Created Date</th>
+                            <th class="text-end px-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for guest in guests %}
+                            <tr>
+                                <td><code>#{{ guest.id }}</code></td>
+                                <td><strong>{{ guest.guest_name }}</strong></td>
+                                <td><small class="text-muted">{{ guest.email }}</small></td>
+                                <td><code class="fs-6">{{ guest.qr_code }}</code></td>
+                                <td>
+                                    <span class="badge {% if guest.email_status == 'Sent' %}bg-success{% elif guest.email_status == 'Failed' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+                                        {{ guest.email_status }}
+                                    </span>
+                                </td>
+                                <td><small class="text-muted">{{ guest.created_at.strftime('%Y-%m-%d') }}</small></td>
+                                <td class="text-end px-4">
+                                    <div class="d-inline-flex gap-2">
+                                        <!-- View QR Pass Trigger -->
+                                        <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#barcodeModal{{ guest.id }}" title="View Entry Pass">
+                                            <i class="bi bi-qr-code"></i>
+                                        </button>
+                                        
+                                        <!-- Resend/Send Email -->
+                                        <form method="POST" action="{{ url_for('email.send_single', guest_id=guest.id) }}">
+                                            {{ action_form.csrf_token }}
+                                            <button type="submit" class="btn btn-sm {% if guest.email_status == 'Sent' %}btn-outline-success{% elif guest.email_status == 'Failed' %}btn-danger{% else %}btn-warning text-dark{% endif %}" title="Send Invitation Email">
+                                                <i class="bi bi-send-fill"></i>
+                                            </button>
+                                        </form>
+
+                                        <!-- Edit Guest -->
+                                        <a href="{{ url_for('guests.edit', guest_id=guest.id) }}" class="btn btn-sm btn-outline-primary" title="Edit Guest">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+
+                                        <!-- Actions Dropdown -->
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="bi bi-three-dots-vertical"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                                <li>
+                                                    <form method="POST" action="{{ url_for('guests.regenerate', guest_id=guest.id) }}" data-guest-name="{{ guest.guest_name }}">
+                                                        {{ action_form.csrf_token }}
+                                                        <button type="submit" class="dropdown-item text-warning d-flex align-items-center">
+                                                            <i class="bi bi-arrow-repeat me-2"></i> Regenerate Code
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li>
+                                                    <form method="POST" action="{{ url_for('guests.delete', guest_id=guest.id) }}" data-guest-name="{{ guest.guest_name }}">
+                                                        {{ action_form.csrf_token }}
+                                                        <button type="submit" class="dropdown-item text-danger d-flex align-items-center">
+                                                            <i class="bi bi-trash3-fill me-2"></i> Delete Record
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination Controls -->
+            {% if pagination.pages > 1 %}
+                <div class="card-footer bg-white border-0 py-3">
+                    <nav aria-label="Guest pagination">
+                        <ul class="pagination justify-content-center mb-0">
+                            <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+                                <a class="page-link" href="{{ url_for('guests.index', page=pagination.prev_num, search=search, status=status, sort_by=sort_by, sort_dir=sort_dir) }}" tabindex="-1">Previous</a>
+                            </li>
+                            
+                            {% for p in pagination.iter_pages(left_edge=2, left_current=2, right_current=3, right_edge=2) %}
+                                {% if p %}
+                                    <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                                        <a class="page-link" href="{{ url_for('guests.index', page=p, search=search, status=status, sort_by=sort_by, sort_dir=sort_dir) }}">{{ p }}</a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+                                <a class="page-link" href="{{ url_for('guests.index', page=pagination.next_num, search=search, status=status, sort_by=sort_by, sort_dir=sort_dir) }}">Next</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            {% endif %}
+            
+        {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-people fs-1 text-secondary mb-3 d-block"></i>
+                <h5>No Guests Found</h5>
+                <p class="text-muted small">No guests match the selected filter/search criteria, or the database is currently empty.</p>
+                <a href="{{ url_for('guests.index') }}" class="btn btn-sm btn-outline-secondary mt-2">Clear Filters</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal section placed at root body level to prevent table clipping/overflow issues -->
+{% if guests %}
+    {% for guest in guests %}
+        <!-- QR Pass View Modal -->
+        <div class="modal fade" id="barcodeModal{{ guest.id }}" tabindex="-1" aria-labelledby="barcodeModalLabel{{ guest.id }}" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="barcodeModalLabel{{ guest.id }}"><i class="bi bi-qr-code me-2"></i>Invitation Pass Preview</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center p-4">
+                        <h4 class="mb-1 text-primary">{{ guest.guest_name }}</h4>
+                        <p class="text-muted small mb-3">{{ guest.email }}</p>
+                        
+                        <div class="p-1 rounded mb-3 text-center bg-light border border-2 border-dashed">
+                            {% if guest.qr_image %}
+                                <img src="{{ url_for('static', filename=guest.qr_image.split('static/')[1]) }}" alt="Invitation Pass" class="img-fluid rounded shadow-sm" style="max-height: 480px;">
+                            {% else %}
+                                <span class="text-danger">Invitation Pass File Missing</span>
+                            {% endif %}
+                        </div>
+                        <div class="fs-4 fw-bold tracking-widest text-dark mb-1">Code: {{ guest.qr_code }}</div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Close Pass</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+{% endif %}
+{% endblock %}

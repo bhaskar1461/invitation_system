@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm border-0 mt-4">
+            <div class="card-header bg-primary text-white py-3">
+                <h5 class="card-title mb-0">
+                    {% if is_edit %}
+                        <i class="bi bi-pencil-square me-2"></i>Edit Guest Details
+                    {% else %}
+                        <i class="bi bi-person-plus-fill me-2"></i>Add New Guest Manually
+                    {% endif %}
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST">
+                    {{ form.csrf_token }}
+                    
+                    <div class="mb-3">
+                        <label for="name" class="form-label font-semibold">{{ form.name.label.text }}</label>
+                        {{ form.name(class="form-control", placeholder="e.g. Dr. John Doe", id="name") }}
+                        {% if form.name.errors %}
+                            {% for error in form.name.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="rollno" class="form-label font-semibold">{{ form.rollno.label.text }}</label>
+                        {{ form.rollno(class="form-control", placeholder="e.g. 20D21A0501", id="rollno") }}
+                        {% if form.rollno.errors %}
+                            {% for error in form.rollno.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="mobile" class="form-label font-semibold">{{ form.mobile.label.text }}</label>
+                        {{ form.mobile(class="form-control", placeholder="e.g. 9876543210", id="mobile") }}
+                        {% if form.mobile.errors %}
+                            {% for error in form.mobile.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="email" class="form-label font-semibold">{{ form.email.label.text }}</label>
+                        {{ form.email(class="form-control", placeholder="e.g. johndoe@example.com", id="email") }}
+                        <div class="form-text">System will validate the email format and prevent duplicate entries.</div>
+                        {% if form.email.errors %}
+                            {% for error in form.email.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    {% if is_edit and guest %}
+                    <div class="card bg-light border-0 mb-4">
+                        <div class="card-body p-3">
+                            <h6 class="text-secondary mb-2"><i class="bi bi-info-circle me-1"></i> Current Invitation Information</h6>
+                            <div class="row text-dark small">
+                                <div class="col-sm-6 mb-2 mb-sm-0">
+                                    <strong>Invitation Code:</strong> <code class="fs-6">{{ guest.qr_code }}</code>
+                                </div>
+                                <div class="col-sm-6">
+                                    <strong>Delivery Status:</strong> 
+                                    <span class="badge {% if guest.email_status == 'Sent' %}bg-success{% elif guest.email_status == 'Failed' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+                                        {{ guest.email_status }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex align-items-center justify-content-between pt-2">
+                        <a href="{{ url_for('guests.index') }}" class="btn btn-outline-secondary px-4">
+                            <i class="bi bi-arrow-left me-1"></i> Cancel
+                        </a>
+                        {{ form.submit(class="btn btn-accent px-4") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

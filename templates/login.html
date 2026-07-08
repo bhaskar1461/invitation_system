@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - SNIST Guest Invitation System</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --navy: #15347e;
+            --royal: #2f53d7;
+            --page-top: #f7f9fe;
+            --page-bottom: #ecf1fb;
+            --card: #ffffff;
+            --field: #f5f7fc;
+            --ink: #17233c;
+            --muted: #6a7894;
+            --border: rgba(23, 35, 60, 0.28);
+            --shadow: 0 14px 32px rgba(29, 52, 117, 0.08);
+            --accent-color: #eab308;
+        }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: 
+                radial-gradient(circle at top left, rgba(48, 73, 216, 0.12), transparent 35%),
+                radial-gradient(circle at bottom right, rgba(25, 57, 143, 0.1), transparent 35%),
+                linear-gradient(180deg, var(--page-top) 0%, var(--page-bottom) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--ink);
+            margin: 0;
+        }
+        .login-card {
+            background: var(--card);
+            border: 1px solid rgba(21, 52, 126, 0.12);
+            border-radius: 18px;
+            padding: 3rem 2.5rem;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: var(--shadow);
+            animation: scaleIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #3049d8 0%, #3d56df 100%);
+            border: 0;
+            color: #ffffff;
+            font-weight: 700;
+            padding: 0.85rem;
+            border-radius: 12px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 12px 24px rgba(48, 73, 216, 0.2);
+            font-size: 1rem;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 28px rgba(48, 73, 216, 0.26);
+            background: linear-gradient(135deg, #3049d8 0%, #3d56df 100%);
+            color: #ffffff;
+        }
+        .btn-primary:active {
+            transform: translateY(0px) scale(0.97);
+        }
+        .form-control {
+            background-color: var(--field);
+            border: 1px solid var(--border);
+            color: var(--ink);
+            padding: 0.8rem 1rem;
+            border-radius: 12px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+        }
+        .form-control:focus {
+            background-color: #ffffff;
+            border-color: rgba(48, 73, 216, 0.35);
+            color: var(--ink);
+            box-shadow: 0 0 0 4px rgba(48, 73, 216, 0.12);
+        }
+        .form-label {
+            font-weight: 600;
+            color: var(--ink);
+            font-size: 0.95rem;
+        }
+        .brand-logo {
+            max-height: 70px;
+            display: block;
+            margin: 0 auto 1.5rem;
+            border-radius: 8px;
+        }
+        .institution-name {
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 1.15rem;
+            color: var(--navy);
+            text-align: center;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+        }
+        .system-title {
+            font-size: 1.4rem;
+            font-weight: 500;
+            text-align: center;
+            color: var(--muted);
+            margin-bottom: 2rem;
+        }
+        .alert {
+            border-radius: 12px;
+            font-size: 0.92rem;
+            font-weight: 500;
+            padding: 12px 14px;
+        }
+        .alert-danger {
+            background: #ffecef;
+            color: #b23a54;
+            border: 1px solid rgba(178, 58, 84, 0.15);
+        }
+        .alert-success {
+            background: #ebfbf2;
+            color: #147a4d;
+            border: 1px solid rgba(20, 122, 77, 0.15);
+        }
+        
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.92); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <!-- Logo image -->
+        <img src="{{ url_for('static', filename='images/sreenidhi-university-logo.png') }}" alt="Sreenidhi University Logo" class="brand-logo">
+        <div class="institution-name">Sreenidhi Institute of Science & Technology</div>
+        <div class="system-title">Guest Invitation Portal</div>
+
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' or category == 'danger' else category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('auth.login') }}">
+            {{ form.csrf_token }}
+            
+            <div class="mb-3">
+                <label for="email" class="form-label">{{ form.email.label.text }}</label>
+                {{ form.email(class="form-control", placeholder="name@sreenidhi.edu.in", id="email") }}
+                {% if form.email.errors %}
+                    {% for error in form.email.errors %}
+                        <div class="text-danger small mt-1">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="mb-4">
+                <label for="password" class="form-label">{{ form.password.label.text }}</label>
+                {{ form.password(class="form-control", placeholder="••••••••", id="password") }}
+                {% if form.password.errors %}
+                    {% for error in form.password.errors %}
+                        <div class="text-danger small mt-1">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="d-grid">
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+    </div>
+
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

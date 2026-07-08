@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.venv/
+
+# Database / Secrets
+.env
+instance/
+*.db
+*.sqlite
+
+# Application logs & uploads
+logs/
+uploads/
+static/barcodes/
+static/qrcodes/
+*.log
+
+# IDEs
+.vscode/
+.idea/

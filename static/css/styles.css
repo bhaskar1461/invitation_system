@@ -1,0 +1,215 @@
+/* Custom Styles for SNIST Invitation Portal - Helpdesk Theme */
+:root {
+    --navy: #15347e;
+    --royal: #2f53d7;
+    --page-top: #f7f9fe;
+    --page-bottom: #ecf1fb;
+    --card: #ffffff;
+    --panel: #fbfcff;
+    --field: #f5f7fc;
+    --ink: #17233c;
+    --muted: #6a7894;
+    --border: rgba(23, 35, 60, 0.28);
+    --shadow: 0 24px 60px rgba(27, 44, 94, 0.12);
+    --soft-shadow: 0 14px 32px rgba(29, 52, 117, 0.08);
+    
+    --snist-primary: var(--navy);
+    --snist-primary-hover: var(--royal);
+    --snist-dark-bg: #091224;
+    --snist-accent: #eab308;
+    --snist-accent-hover: #ca8a04;
+    --snist-light: var(--page-top);
+    --sidebar-width: 260px;
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background: 
+        radial-gradient(circle at top left, rgba(48, 73, 216, 0.04), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(25, 57, 143, 0.04), transparent 30%),
+        linear-gradient(180deg, var(--page-top) 0%, var(--page-bottom) 100%);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6, .card-title, .navbar-brand {
+    font-family: 'Space Grotesk', sans-serif;
+    color: var(--navy);
+    font-weight: 700;
+}
+
+/* Sidebar styling */
+#sidebar {
+    min-width: var(--sidebar-width);
+    max-width: var(--sidebar-width);
+    background-color: var(--snist-dark-bg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+    transition: all 0.3s ease;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+#sidebar .nav-link {
+    padding: 0.85rem 1.2rem;
+    font-weight: 500;
+    color: #94a3b8 !important;
+    transition: all 0.2s ease-in-out;
+}
+
+#sidebar .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.04);
+    color: #ffffff !important;
+}
+
+#sidebar .nav-link.active {
+    background-color: var(--snist-primary) !important;
+    color: #ffffff !important;
+    border-left: 4px solid var(--snist-accent);
+}
+
+.bg-dark-blue {
+    background-color: var(--snist-dark-bg);
+}
+
+.bg-royal-blue {
+    background-color: var(--snist-primary);
+}
+
+/* Custom Buttons matching Helpdesk style */
+.btn-primary {
+    background: linear-gradient(135deg, #3049d8 0%, #3d56df 100%);
+    border: 0;
+    color: #ffffff;
+    font-weight: 700;
+    border-radius: 12px;
+    box-shadow: 0 10px 20px rgba(48, 73, 216, 0.15);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 24px rgba(48, 73, 216, 0.22);
+    background: linear-gradient(135deg, #3049d8 0%, #3d56df 100%);
+    color: #ffffff;
+}
+
+.btn-primary:active {
+    transform: translateY(0px) scale(0.97);
+}
+
+.btn-accent {
+    background: linear-gradient(135deg, #ca8a04 0%, #eab308 100%);
+    border: 0;
+    color: #0f172a;
+    font-weight: 700;
+    border-radius: 12px;
+    box-shadow: 0 10px 20px rgba(234, 179, 8, 0.15);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-accent:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 24px rgba(234, 179, 8, 0.22);
+    background: linear-gradient(135deg, #ca8a04 0%, #eab308 100%);
+    color: #0f172a;
+}
+
+.btn-accent:active {
+    transform: translateY(0px) scale(0.97);
+}
+
+/* Cards styling matching Helpdesk panels */
+.card {
+    background: var(--card);
+    border: 1px solid rgba(21, 52, 126, 0.12) !important;
+    border-radius: 18px !important;
+    box-shadow: var(--soft-shadow) !important;
+    animation: fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow) !important;
+}
+
+.card-header {
+    border-bottom: 1px solid rgba(21, 52, 126, 0.08) !important;
+    background: linear-gradient(180deg, rgba(241, 246, 255, 0.5), rgba(255, 255, 255, 0.8)) !important;
+    border-top-left-radius: 18px !important;
+    border-top-right-radius: 18px !important;
+}
+
+/* Left borders for visual highlights */
+.border-left-primary { border-left: 4px solid var(--royal) !important; }
+.border-left-success { border-left: 4px solid #147a4d !important; }
+.border-left-warning { border-left: 4px solid var(--snist-accent) !important; }
+.border-left-danger { border-left: 4px solid #b23a54 !important; }
+
+/* Input Fields matching Helpdesk */
+.form-control, .form-select {
+    background-color: var(--field) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--ink) !important;
+    padding: 0.75rem 1rem !important;
+    border-radius: 12px !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease !important;
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: #ffffff !important;
+    border-color: rgba(48, 73, 216, 0.35) !important;
+    box-shadow: 0 0 0 4px rgba(48, 73, 216, 0.12) !important;
+}
+
+/* Custom Table Filters Bar */
+.filter-bar {
+    background: var(--card);
+    border: 1px solid rgba(21, 52, 126, 0.12);
+    border-radius: 14px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--soft-shadow);
+    animation: fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+}
+
+/* Badges custom design */
+.badge {
+    padding: 0.45em 0.85em;
+    font-weight: 600;
+    border-radius: 8px;
+    font-size: 0.82rem;
+}
+
+.bg-success { background-color: #ebfbf2 !important; color: #147a4d !important; border: 1px solid rgba(20, 122, 77, 0.15); }
+.bg-danger { background-color: #ffecef !important; color: #b23a54 !important; border: 1px solid rgba(178, 58, 84, 0.15); }
+.bg-warning { background-color: #fef9c3 !important; color: #ca8a04 !important; border: 1px solid rgba(202, 138, 4, 0.15); }
+
+/* Table adjustments */
+.table th {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    color: var(--navy);
+}
+
+.table-light {
+    --bs-table-bg: rgba(241, 246, 255, 0.6) !important;
+}
+
+/* Responsive sidebar mobile styling */
+@media (max-width: 768px) {
+    #sidebar {
+        margin-left: calc(-1 * var(--sidebar-width));
+    }
+    #sidebar.active {
+        margin-left: 0;
+    }
+}
+
+/* ── Entrance Animations ────────────────────────────── */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(22px); }
+    to   { opacity: 1; transform: translateY(0); }
+}

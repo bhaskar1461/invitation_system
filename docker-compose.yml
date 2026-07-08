@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8888:8000"
+    environment:
+      - SECRET_KEY=snist-docker-secret-key-987654321
+      - DATABASE_URL=mysql+pymysql://root:rootpassword@host.docker.internal:3307/founder_day
+      - SMTP_HOST=smtp.gmail.com
+      - SMTP_PORT=587
+      - SMTP_USE_TLS=True
+      - SMTP_USER=helpdesk@sreenidhi.edu.in
+      - SMTP_PASSWORD=qgmlvipcesyqlqlw
+      - SMTP_SENDER=helpdesk@sreenidhi.edu.in
+    volumes:
+      - ./static/barcodes:/app/static/barcodes
+      - ./logs:/app/logs
+      - db-data:/app/instance
+    restart: always
+
+volumes:
+  db-data:
