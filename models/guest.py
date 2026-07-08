@@ -12,7 +12,7 @@ class Guest(db.Model):
     qr_code = db.Column(db.String(255), unique=True, nullable=False, index=True)
     qr_image = db.Column(db.String(255), nullable=True)
     invite_sent = db.Column(db.Boolean, default=False, nullable=False)
-    status = db.Column(db.Enum('ACTIVE', 'INACTIVE'), default='ACTIVE', nullable=False)
+    status = db.Column(db.String(50), default='ACTIVE', nullable=False)
     is_scanned = db.Column(db.Boolean, default=False, nullable=False)
     scanned_at = db.Column(db.DateTime, nullable=True)
     device_ip = db.Column(db.String(100), nullable=True)
