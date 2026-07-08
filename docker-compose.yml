@@ -1,6 +1,10 @@
 version: '3.8'
 
 services:
+  redis:
+    image: redis:7-alpine
+    restart: always
+
   web:
     build: .
     ports:
@@ -14,10 +18,44 @@ services:
       - SMTP_USER=Invitation@suh.edu.in
       - SMTP_PASSWORD=qxdqxqkyiomhgakq
       - SMTP_SENDER=Invitation@suh.edu.in
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - SMTP_BATCH_LIMIT=100
+      - SMTP_RATE_DELAY=1.0
     volumes:
       - ./static/barcodes:/app/static/barcodes
       - ./logs:/app/logs
       - db-data:/app/instance
+    depends_on:
+      - redis
+    restart: always
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/login')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  celery_worker:
+    build: .
+    command: celery -A app.celery worker --loglevel=info
+    environment:
+      - SECRET_KEY=snist-docker-secret-key-987654321
+      - DATABASE_URL=mysql+pymysql://root:rootpassword@host.docker.internal:3307/founder_day
+      - SMTP_HOST=smtp.gmail.com
+      - SMTP_PORT=587
+      - SMTP_USE_TLS=True
+      - SMTP_USER=Invitation@suh.edu.in
+      - SMTP_PASSWORD=qxdqxqkyiomhgakq
+      - SMTP_SENDER=Invitation@suh.edu.in
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - SMTP_BATCH_LIMIT=100
+      - SMTP_RATE_DELAY=1.0
+    volumes:
+      - ./static/barcodes:/app/static/barcodes
+      - ./logs:/app/logs
+    depends_on:
+      - redis
     restart: always
 
 volumes:

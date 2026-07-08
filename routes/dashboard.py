@@ -83,7 +83,8 @@ def reports():
 @dashboard_bp.route('/scan/<string:qr_code>')
 @login_required
 def scan_verify(qr_code):
-    guest = Guest.query.filter_by(qr_code=qr_code).first()
+    # Query with row-level transaction locking to prevent gate concurrency check-in race conditions
+    guest = db.session.query(Guest).filter_by(qr_code=qr_code).with_for_update().first()
     if not guest:
         return render_template('guests/scan_result.html', status='invalid', qr_code=qr_code), 404
         

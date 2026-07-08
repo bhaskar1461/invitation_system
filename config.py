@@ -32,3 +32,9 @@ class Config:
     SMTP_USER = os.environ.get('SMTP_USER', os.environ.get('MAIL_USERNAME'))
     SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD', os.environ.get('MAIL_PASSWORD'))
     SMTP_SENDER = os.environ.get('SMTP_SENDER', os.environ.get('MAIL_DEFAULT_SENDER', os.environ.get('SMTP_USER', os.environ.get('MAIL_USERNAME', 'invitations@sreenidhi.edu.in'))))
+
+    # Celery Background Workers & Throttling
+    CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379/0')
+    CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
+    SMTP_BATCH_LIMIT = int(os.environ.get('SMTP_BATCH_LIMIT', 100))
+    SMTP_RATE_DELAY = float(os.environ.get('SMTP_RATE_DELAY', 1.0))

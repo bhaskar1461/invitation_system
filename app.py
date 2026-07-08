@@ -9,11 +9,33 @@ from config import Config
 from models import db
 from models.user import User
 
+from celery import Celery
+from flask_migrate import Migrate
+
 # Extensions
 login_manager = LoginManager()
 csrf = CSRFProtect()
+migrate = Migrate()
+
+# Celery instance placeholder initialized on import
+celery = Celery(
+    'app',
+    broker=os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379/0'),
+    backend=os.environ.get('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
+)
+
+def init_celery(celery_app, flask_app):
+    celery_app.conf.update(flask_app.config)
+
+    class ContextTask(celery_app.Task):
+        def __call__(self, *args, **kwargs):
+            with flask_app.app_context():
+                return self.run(*args, **kwargs)
+
+    celery_app.Task = ContextTask
 
 def create_app(config_class=Config):
+    global celery
     app = Flask(__name__)
     app.config.from_object(config_class)
 
@@ -25,6 +47,10 @@ def create_app(config_class=Config):
     db.init_app(app)
     login_manager.init_app(app)
     csrf.init_app(app)
+    migrate.init_app(app, db)
+
+    # Initialize Celery within application context
+    init_celery(celery, app)
 
     # Automatically create missing database tables on startup
     with app.app_context():
