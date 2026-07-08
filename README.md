@@ -39,10 +39,10 @@ Stores the details of invitees, their unique invitation passes, email status, an
 | `updated_at` | TIMESTAMP | NULL | Timestamp of last modification/email dispatch. |
 | `last_scanned_at` | TIMESTAMP | NULL | Timestamp of the last scan action. |
 
-### 2. User Accounts (In-Memory)
-Administrators and developer accounts are loaded securely in-memory for validation.
+### 2. User Account (In-Memory)
+Administrators 
 * **Admin Role**: `admin@sreenidhi.edu.in` (Password: `Admin@SNIST123`)
-* **Developer Role**: `developer@sreenidhi.edu.in` (Password: `Dev@SNIST123`)
+
 
 ---
 
