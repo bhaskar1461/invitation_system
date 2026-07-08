@@ -11,9 +11,9 @@ services:
       - SMTP_HOST=smtp.gmail.com
       - SMTP_PORT=587
       - SMTP_USE_TLS=True
-      - SMTP_USER=helpdesk@sreenidhi.edu.in
-      - SMTP_PASSWORD=qgmlvipcesyqlqlw
-      - SMTP_SENDER=helpdesk@sreenidhi.edu.in
+      - SMTP_USER=Invitation@suh.edu.in
+      - SMTP_PASSWORD=qxdqxqkyiomhgakq
+      - SMTP_SENDER=Invitation@suh.edu.in
     volumes:
       - ./static/barcodes:/app/static/barcodes
       - ./logs:/app/logs

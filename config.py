@@ -14,6 +14,9 @@ class Config:
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///guest_invitation.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    # Base URL for scan verification QR link
+    BASE_URL = os.environ.get('BASE_URL', 'http://localhost:5000')
+
     # Upload configurations
     UPLOAD_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'uploads')
     MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5 MB

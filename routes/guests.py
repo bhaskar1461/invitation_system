@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_required
 
+from models import db
 from models.guest import Guest
 from forms import GuestForm, EmptyForm
 from services.guest_service import GuestService
@@ -140,3 +141,23 @@ def regenerate(guest_id):
     else:
         flash("CSRF token verification failed.", "danger")
     return redirect(url_for('guests.index'))
+
+@guests_bp.route('/<int:guest_id>/toggle_scan', methods=['POST'])
+@login_required
+def toggle_scan(guest_id):
+    form = EmptyForm()
+    if form.validate_on_submit():
+        from datetime import datetime
+        guest = Guest.query.get_or_404(guest_id)
+        guest.is_scanned = not guest.is_scanned
+        if guest.is_scanned:
+            guest.scanned_at = datetime.utcnow()
+            guest.last_scanned_at = datetime.utcnow()
+        else:
+            guest.scanned_at = None
+        db.session.commit()
+        status_str = "Scanned" if guest.is_scanned else "Not Scanned"
+        flash(f"Scan status for {guest.guest_name} has been toggled to {status_str}.", "success")
+    else:
+        flash("CSRF token verification failed.", "danger")
+    return redirect(request.referrer or url_for('guests.index'))

@@ -13,21 +13,30 @@ from models.email_log import EmailLog
 
 class EmailService:
     @staticmethod
-    def send_invitation_email(guest_id):
+    def send_invitation_email(guest_id, base_url=None):
         """
         Asynchronously sends a personalized invitation email to the guest.
         Spawns a background thread to prevent blocking the web worker.
         """
         app = current_app._get_current_object()
+        
+        # Capture base URL from request context or config before starting background thread
+        if not base_url:
+            from flask import has_request_context, request
+            if has_request_context():
+                base_url = request.host_url
+            else:
+                base_url = app.config.get('BASE_URL', 'http://localhost:5000')
+
         thread = threading.Thread(
             target=EmailService._send_invitation_thread,
-            args=(app, guest_id)
+            args=(app, guest_id, base_url)
         )
         thread.start()
         return True, "Email dispatch initiated in background"
 
     @staticmethod
-    def _send_invitation_thread(app, guest_id):
+    def _send_invitation_thread(app, guest_id, base_url):
         """
         Runs in background thread, utilizing application context.
         """
@@ -40,6 +49,20 @@ class EmailService:
             sender = app.config['SMTP_SENDER']
             recipient = guest.email
             subject = f"Official Invitation: Sreenidhi University Founder's Day"
+
+            # 0. Generate or regenerate QR code containing the unique scan URL
+            scan_url = f"{base_url.rstrip('/')}/scan/{guest.qr_code}"
+            try:
+                from services.barcode_service import BarcodeService
+                # This will overlay the QR code containing scan_url onto the template poster
+                qr_image_path = BarcodeService.generate_barcode(guest.qr_code, scan_url)
+                guest.qr_image = qr_image_path
+                db.session.commit()
+            except Exception as e:
+                error_msg = f"Failed to generate QR code with scan URL: {str(e)}"
+                app.logger.error(error_msg)
+                EmailService._log_outcome(guest, 'Failed', error_msg)
+                return
 
             # Determine full barcode/QR image path
             barcode_rel_path = guest.qr_image

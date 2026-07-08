@@ -90,6 +90,7 @@
                                     {% endif %}
                                 </a>
                             </th>
+                            <th>Attendance</th>
                             <th>Created Date</th>
                             <th class="text-end px-4">Actions</th>
                         </tr>
@@ -105,6 +106,15 @@
                                     <span class="badge {% if guest.email_status == 'Sent' %}bg-success{% elif guest.email_status == 'Failed' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
                                         {{ guest.email_status }}
                                     </span>
+                                </td>
+                                <td>
+                                    <form method="POST" action="{{ url_for('guests.toggle_scan', guest_id=guest.id) }}" class="d-inline">
+                                        {{ action_form.csrf_token }}
+                                        <button type="submit" class="btn btn-sm {% if guest.is_scanned %}btn-success{% else %}btn-secondary{% endif %} fw-semibold py-1 px-2 border-0 rounded-3 shadow-xs" {% if guest.is_scanned and guest.scanned_at %}title="Scanned at {{ guest.scanned_at.strftime('%Y-%m-%d %H:%M:%S UTC') }}. Click to mark as Not Scanned."{% else %}title="Click to mark as Scanned."{% endif %}>
+                                            <i class="bi {% if guest.is_scanned %}bi-check-circle-fill{% else %}bi-dash-circle-fill{% endif %} me-1"></i>
+                                            {% if guest.is_scanned %}Scanned{% else %}Not Scanned{% endif %}
+                                        </button>
+                                    </form>
                                 </td>
                                 <td><small class="text-muted">{{ guest.created_at.strftime('%Y-%m-%d') }}</small></td>
                                 <td class="text-end px-4">
@@ -133,6 +143,7 @@
                                                 <i class="bi bi-three-dots-vertical"></i>
                                             </button>
                                             <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+
                                                 <li>
                                                     <form method="POST" action="{{ url_for('guests.regenerate', guest_id=guest.id) }}" data-guest-name="{{ guest.guest_name }}">
                                                         {{ action_form.csrf_token }}

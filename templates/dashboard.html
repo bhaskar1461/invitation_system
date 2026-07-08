@@ -44,6 +44,23 @@
         </div>
     </div>
 
+    <!-- Checked-in Guests -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow-sm h-100 py-2 border-0">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Checked-in Guests</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ scanned_count }} / {{ total_guests }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-qr-code-scan fa-2x text-gray-300 fs-2 text-info"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Pending Invitations -->
     <div class="col-xl-3 col-md-6 mb-4">
         <div class="card border-left-warning shadow-sm h-100 py-2 border-0">
@@ -96,7 +113,8 @@
                                     <th>Name</th>
                                     <th>Email</th>
                                     <th>Code</th>
-                                    <th>Status</th>
+                                    <th>Email Status</th>
+                                    <th>Attendance</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -108,6 +126,11 @@
                                         <td>
                                             <span class="badge {% if guest.email_status == 'Sent' %}bg-success{% elif guest.email_status == 'Failed' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
                                                 {{ guest.email_status }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge {% if guest.is_scanned %}bg-info{% else %}bg-secondary{% endif %}">
+                                                {% if guest.is_scanned %}Scanned{% else %}Not Scanned{% endif %}
                                             </span>
                                         </td>
                                     </tr>

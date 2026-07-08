@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required
 from datetime import datetime, timedelta
 
@@ -17,6 +17,7 @@ def index():
     sent_count = Guest.query.filter_by(email_status='Sent').count()
     pending_count = Guest.query.filter_by(email_status='Pending').count()
     failed_count = Guest.query.filter_by(email_status='Failed').count()
+    scanned_count = Guest.query.filter_by(is_scanned=True).count()
 
     # Time-based stats
     now = datetime.utcnow()
@@ -37,6 +38,7 @@ def index():
         sent_count=sent_count,
         pending_count=pending_count,
         failed_count=failed_count,
+        scanned_count=scanned_count,
         added_today=added_today,
         added_this_week=added_this_week,
         recent_guests=recent_guests,

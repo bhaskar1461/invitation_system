@@ -5,7 +5,7 @@ from flask import current_app
 
 class BarcodeService:
     @staticmethod
-    def generate_barcode(code):
+    def generate_barcode(code, data=None):
         """
         Generates a QR code for the given code and overlays it on the event poster image.
         Saves the compiled PNG under static/barcodes/<code>.png.
@@ -27,7 +27,7 @@ class BarcodeService:
             box_size=10,
             border=0,
         )
-        qr.add_data(code)
+        qr.add_data(data if data else code)
         qr.make(fit=True)
         
         qr_img = qr.make_image(fill_color="black", back_color="white")
