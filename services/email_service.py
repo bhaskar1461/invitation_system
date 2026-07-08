@@ -50,16 +50,15 @@ class EmailService:
             recipient = guest.email
             subject = f"Official Invitation: Sreenidhi University Founder's Day"
 
-            # 0. Generate or regenerate QR code containing the unique scan URL
-            scan_url = f"{base_url.rstrip('/')}/scan/{guest.qr_code}"
+            # 0. Generate or regenerate QR code containing only the unique verification code
             try:
                 from services.barcode_service import BarcodeService
-                # This will overlay the QR code containing scan_url onto the template poster
-                qr_image_path = BarcodeService.generate_barcode(guest.qr_code, scan_url)
+                # This will overlay the QR code containing guest.qr_code onto the template poster
+                qr_image_path = BarcodeService.generate_barcode(guest.qr_code)
                 guest.qr_image = qr_image_path
                 db.session.commit()
             except Exception as e:
-                error_msg = f"Failed to generate QR code with scan URL: {str(e)}"
+                error_msg = f"Failed to generate QR code: {str(e)}"
                 app.logger.error(error_msg)
                 EmailService._log_outcome(guest, 'Failed', error_msg)
                 return
