@@ -21,42 +21,25 @@ Stores the details of invitees, their unique invitation passes, email status, an
 
 | Column | Type | Constraints | Description |
 | :--- | :--- | :--- | :--- |
-| `id` | INT | Primary Key, Auto Increment | Unique guest identifier. |
-| `guest_name` | VARCHAR(100) | NOT NULL | Full name of the guest. |
-| `rollno` | VARCHAR(50) | NULL | Academic roll number (if applicable). |
-| `mobile` | VARCHAR(20) | NULL | Contact mobile number. |
-| `email` | VARCHAR(120) | Unique, NOT NULL, Indexed | Email address used for sending invitation. |
-| `qr_code` | VARCHAR(50) | Unique, NOT NULL | Unique 6-digit numeric verification code. |
+| `id` | BIGINT | Primary Key, Auto Increment | Unique guest identifier. |
+| `guest_name` | VARCHAR(200) | NOT NULL | Full name of the guest. |
+| `rollno` | VARCHAR(20) | NOT NULL | Academic roll number. |
+| `mobile` | VARCHAR(20) | NOT NULL | Contact mobile number. |
+| `email` | VARCHAR(255) | Unique, NOT NULL, Indexed | Email address used for sending invitation. |
+| `qr_code` | VARCHAR(255) | Unique, NOT NULL, Indexed | Unique 6-digit numeric verification code. |
 | `qr_image` | VARCHAR(255) | NULL | Filepath to the generated QR pass poster image. |
-| `invite_sent` | BOOLEAN | Default: `FALSE` | Toggle indicating if the email invite has been sent. |
-| `status` | VARCHAR(50) | Default: `'Pending'` | Invitation status indicator. |
-| `is_scanned` | BOOLEAN | Default: `FALSE` | **Attendance Flag**: `0` = Not Scanned, `1` = Scanned. |
-| `scanned_at` | DATETIME | NULL | Timestamp of the first successful scan/check-in. |
-| `device_ip` | VARCHAR(50) | NULL | IP address of the scanning device. |
-| `device_id` | VARCHAR(100) | NULL | User-Agent of the checking device. |
-| `remarks` | TEXT | NULL | Additional comments or notes. |
-| `created_at` | DATETIME | Default: `utcnow` | Timestamp when the record was registered. |
-| `updated_at` | DATETIME | Default: `utcnow`, auto-update | Timestamp of last modification. |
-| `last_scanned_at` | DATETIME | NULL | Timestamp of the last scan action. |
-| `created_by` | INT | NULL | User ID who added the record. |
-| `updated_by` | INT | NULL | User ID who edited the record. |
-| `email_status` | VARCHAR(50) | Default: `'Pending'` | Delivery status (`Pending`, `Sent`, `Failed`). |
-| `email_sent_at` | DATETIME | NULL | Timestamp when the email dispatch was finalized. |
-| `email_retry_count` | INT | Default: `0` | Count of email dispatch attempts. |
-| `last_email_error` | TEXT | NULL | Diagnostic logs for failed email transmissions. |
+| `invite_sent` | TINYINT(1) | Default: `0`, NOT NULL | Toggle indicating if the email invite has been sent. |
+| `status` | ENUM('ACTIVE', 'INACTIVE') | Default: `'ACTIVE'`, NOT NULL | Invitation status indicator. |
+| `is_scanned` | TINYINT(1) | Default: `0`, NOT NULL | **Attendance Flag**: `0` = Not Scanned, `1` = Scanned. |
+| `scanned_at` | TIMESTAMP | NULL | Timestamp of the first successful scan/check-in. |
+| `device_ip` | VARCHAR(100) | NULL | IP address of the scanning device. |
+| `device_id` | VARCHAR(255) | NULL | User-Agent of the checking device. |
+| `remarks` | TEXT | NULL | Holds SMTP transmission failure tracebacks (cleared on success). |
+| `created_at` | TIMESTAMP | NULL | Timestamp when the record was registered. |
+| `updated_at` | TIMESTAMP | NULL | Timestamp of last modification/email dispatch. |
+| `last_scanned_at` | TIMESTAMP | NULL | Timestamp of the last scan action. |
 
-### 2. Table: `email_logs`
-Audit trails for outbound emails.
-
-| Column | Type | Constraints | Description |
-| :--- | :--- | :--- | :--- |
-| `id` | INT | Primary Key, Auto Increment | Unique log entry identifier. |
-| `guest_id` | INT | ForeignKey (`event_qr_codes.id` ON DELETE CASCADE), NOT NULL | Linked guest record. |
-| `sent_at` | DATETIME | Default: `utcnow`, NOT NULL | Dispatch timestamp. |
-| `status` | VARCHAR(20) | NOT NULL | Dispatch result (`Sent`, `Failed`). |
-| `error_message` | TEXT | NULL | Failure exception log details. |
-
-### 3. User Accounts (In-Memory)
+### 2. User Accounts (In-Memory)
 Administrators and developer accounts are loaded securely in-memory for validation.
 * **Admin Role**: `admin@sreenidhi.edu.in` (Password: `Admin@SNIST123`)
 * **Developer Role**: `developer@sreenidhi.edu.in` (Password: `Dev@SNIST123`)
@@ -65,16 +48,16 @@ Administrators and developer accounts are loaded securely in-memory for validati
 
 ## Summary of Recent Changes
 
-1. **Dockerization**:
-   - Added `Dockerfile` running Python 3.11-slim with system tools & Python package dependencies pre-installed.
-   - Configured `docker-compose.yml` to define environment variables, persistent volumes for databases/logs/barcodes, and port mappings (running on port `8888` on the host).
-2. **Dashboard & Attendance Upgrades**:
-   - Added live "Checked-in Guests" metrics showing total scanned count vs. total guests.
-   - Implemented dynamic scan/attendance badges and quick-action check-in toggle controls directly within the guest directory list.
-3. **QR URL Embedding**:
-   - Updated the barcode service to generate QR codes with functional scan verification redirect URLs (`/scan/<qr_code>`) rather than just raw verification codes.
-4. **Environment Settings**:
-   - Added `BASE_URL` support to allow flexible generation of scan verification links on production/staging domains.
+1. **Production Task Queue (Celery & Redis)**:
+   - Replaced thread-based email sending with a robust Celery background queue powered by a Redis broker.
+   - Configured SMTP rate throttling limits (`SMTP_RATE_DELAY` and `SMTP_BATCH_LIMIT`) to safely throttle bulk dispatches.
+2. **Scan Security & Row Locking**:
+   - Implemented database row locking (`SELECT FOR UPDATE`) on the `/scan/<qr_code>` endpoint to atomically lock guest check-in states and prevent concurrent gate scanners from exploiting double-entries.
+3. **Database Migrations (Alembic/Flask-Migrate)**:
+   - Configured Flask-Migrate database version tracks to automatically sync, migrate, and update production MySQL databases safely.
+4. **Dockerization**:
+   - Integrated healthcheck scripts to verify web container service status.
+   - Configured decoupled container services (`redis`, `web`, `celery_worker`) inside `docker-compose.yml` to manage task lifecycles separately.
 
 ---
 
@@ -128,13 +111,23 @@ SMTP_PASSWORD=
 SMTP_SENDER=invitations@sreenidhi.edu.in
 ```
 
-### 4. Initialize Database Tables
-Run the database initialization script to construct all database tables:
+### 4. Run Redis Server
+Ensure you have Redis running locally (defaulting to `redis://127.0.0.1:6379/0`).
+
+### 5. Run Database Migrations
+Initialize and sync database migrations using Alembic:
 ```bash
-python db_init.py
+# Sync local database with the latest schema version
+flask db upgrade
 ```
 
-### 5. Launch the Server
+### 6. Launch Celery Worker
+Start the Celery worker process to run background dispatches in a separate terminal:
+```bash
+celery -A app.celery worker --loglevel=info
+```
+
+### 7. Launch the Server
 Execute the Flask server:
 ```bash
 python app.py
