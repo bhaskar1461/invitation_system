@@ -53,6 +53,22 @@ def index():
     pagination = query.paginate(page=page, per_page=10, error_out=False)
     guests = pagination.items
     
+    # Lazily generate QR code passes for guests on the current page if they are missing
+    import os
+    for guest in guests:
+        barcode_full_path = ""
+        if guest.qr_image:
+            barcode_full_path = os.path.join(current_app.root_path, guest.qr_image)
+            
+        if not guest.qr_image or not os.path.exists(barcode_full_path):
+            try:
+                from services.barcode_service import BarcodeService
+                qr_image_path = BarcodeService.generate_barcode(guest.qr_code)
+                guest.qr_image = qr_image_path
+                db.session.commit()
+            except Exception as e:
+                current_app.logger.error(f"Failed to generate QR code dynamically for guest #{guest.id}: {str(e)}")
+    
     action_form = EmptyForm() # Form for CSRF validation on action buttons
     
     return render_template(

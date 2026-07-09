@@ -33,17 +33,12 @@ def send_pending():
             flash("No pending invitations to send.", "info")
             return redirect(request.referrer or url_for('guests.index'))
             
-        success_count = 0
-        failed_count = 0
-        
-        for guest in pending_guests:
-            success, _ = EmailService.send_invitation_email(guest.id)
-            if success:
-                success_count += 1
-            else:
-                failed_count += 1
-                
-        flash(f"Bulk dispatch initiated! Successfully launched: {success_count} emails. Failed to start: {failed_count}.", "success" if failed_count == 0 else "warning")
+        guest_ids = [g.id for g in pending_guests]
+        success, message = EmailService.send_bulk_invitations(guest_ids)
+        if success:
+            flash(f"Bulk dispatch initiated! Queued {len(guest_ids)} emails for sending.", "success")
+        else:
+            flash(f"Failed to initiate bulk dispatch: {message}", "danger")
     else:
         flash("CSRF token verification failed.", "danger")
         
@@ -59,17 +54,12 @@ def retry_failed():
             flash("No failed invitations to retry.", "info")
             return redirect(request.referrer or url_for('guests.index'))
             
-        success_count = 0
-        failed_count = 0
-        
-        for guest in failed_guests:
-            success, _ = EmailService.send_invitation_email(guest.id)
-            if success:
-                success_count += 1
-            else:
-                failed_count += 1
-                
-        flash(f"Retry dispatch initiated! Successfully launched: {success_count} emails. Failed to start: {failed_count}.", "success" if failed_count == 0 else "warning")
+        guest_ids = [g.id for g in failed_guests]
+        success, message = EmailService.send_bulk_invitations(guest_ids)
+        if success:
+            flash(f"Retry dispatch initiated! Queued {len(guest_ids)} failed emails for retry.", "success")
+        else:
+            flash(f"Failed to initiate retry dispatch: {message}", "danger")
     else:
         flash("CSRF token verification failed.", "danger")
         

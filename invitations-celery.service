@@ -1,0 +1,14 @@
+[Unit]
+Description=invitations Celery Worker
+After=network.target redis-server.service
+
+[Service]
+User=seg
+Group=seg
+WorkingDirectory=/var/www/invitation_system
+Environment="PATH=/var/www/invitation_system/venv/bin"
+ExecStart=/var/www/invitation_system/venv/bin/celery -A app.celery worker --loglevel=info
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

@@ -38,17 +38,14 @@ class GuestService:
         # Generate unique code
         code = GuestService.generate_unique_code()
 
-        # Generate QR code poster overlay path
-        qr_image_path = BarcodeService.generate_barcode(code)
-
-        # Create Guest in event_qr_codes table
+        # Create Guest in event_qr_codes table with qr_image as None (generated lazily)
         guest = Guest(
             guest_name=name.strip(),
             rollno=rollno.strip() if rollno else "",
             mobile=mobile.strip() if mobile else "",
             email=email,
             qr_code=code,
-            qr_image=qr_image_path,
+            qr_image=None,
             invite_sent=False,
             status='ACTIVE'
         )

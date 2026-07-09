@@ -63,8 +63,21 @@ class ExcelService:
                     mobile_idx = idx
                     break
             
+            existing_emails = {g[0].lower() for g in db.session.query(Guest.email).filter(Guest.email.is_not(None)).all()}
+            existing_codes = {g[0] for g in db.session.query(Guest.qr_code).filter(Guest.qr_code.is_not(None)).all()}
+            
             seen_emails = set()
             row_num = 1
+            guests_to_add = []
+            
+            def get_unique_code_in_memory():
+                import random
+                for _ in range(10):
+                    code = str(random.randint(100000, 999999))
+                    if code not in existing_codes:
+                        existing_codes.add(code)
+                        return code
+                raise RuntimeError("Failed to generate a unique 6-digit code.")
             
             for row in rows_iter:
                 row_num += 1
@@ -116,9 +129,8 @@ class ExcelService:
                     })
                     continue
                 
-                # Check for duplicates in database
-                db_guest = Guest.query.filter_by(email=email).first()
-                if db_guest:
+                # Check for duplicates in database cache
+                if email in existing_emails:
                     summary['skipped_duplicates'] += 1
                     summary['skipped_details'].append({
                         'row': row_num,
@@ -132,24 +144,34 @@ class ExcelService:
                 rollno = None
                 if rollno_idx is not None and len(row) > rollno_idx:
                     rollno_val = row[rollno_idx]
-                    rollno = str(rollno_val).strip() if rollno_val is not None else None
+                    rollno = str(rollno_val).strip() if rollno_val is not None else ""
 
                 mobile = None
                 if mobile_idx is not None and len(row) > mobile_idx:
                     mobile_val = row[mobile_idx]
-                    mobile = str(mobile_val).strip() if mobile_val is not None else None
+                    mobile = str(mobile_val).strip() if mobile_val is not None else ""
                 
                 # Add to file set to prevent duplicates inside sheet
                 seen_emails.add(email)
                 
-                # Insert Guest and trigger invitation email
+                # Add to cache to prevent duplicate in same sheet if checks happen
+                existing_emails.add(email)
+                
+                # Create Guest and append to transaction
                 try:
-                    new_guest = GuestService.create_guest(name, email, rollno=rollno, mobile=mobile)
-                    
-                    # Automatically trigger invitation email dispatch in background
-                    from services.email_service import EmailService
-                    EmailService.send_invitation_email(new_guest.id)
-                    
+                    code = get_unique_code_in_memory()
+                    new_guest = Guest(
+                        guest_name=name.strip(),
+                        rollno=rollno,
+                        mobile=mobile,
+                        email=email,
+                        qr_code=code,
+                        qr_image=None,
+                        invite_sent=False,
+                        status='ACTIVE'
+                    )
+                    db.session.add(new_guest)
+                    guests_to_add.append(new_guest)
                     summary['imported_count'] += 1
                 except Exception as e:
                     current_app.logger.error(f"Error creating guest on row {row_num}: {str(e)}")
@@ -161,6 +183,28 @@ class ExcelService:
                     })
             
             wb.close()
+            
+            # Commit all inserts in a single transaction
+            if guests_to_add:
+                try:
+                    db.session.commit()
+                except Exception as commit_err:
+                    db.session.rollback()
+                    current_app.logger.error(f"Failed to commit bulk import: {str(commit_err)}")
+                    summary['errors'].append(f"Database error: failed to save guest list. {str(commit_err)}")
+                    summary['imported_count'] = 0
+                    summary['success'] = False
+                    return summary
+                
+                # After successful commit, trigger bulk emails (caught separately so Celery broker down does not fail database import)
+                try:
+                    from services.email_service import EmailService
+                    guest_ids = [g.id for g in guests_to_add]
+                    EmailService.send_bulk_invitations(guest_ids)
+                except Exception as queue_err:
+                    current_app.logger.error(f"Failed to queue bulk emails during import: {str(queue_err)}")
+                    summary['errors'].append(f"Imported successfully, but background email dispatch failed to queue: {str(queue_err)}")
+                    
             summary['success'] = True
             
         except Exception as e:

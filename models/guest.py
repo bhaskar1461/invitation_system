@@ -4,7 +4,7 @@ from models import db
 class Guest(db.Model):
     __tablename__ = 'event_qr_codes'
 
-    id = db.Column(db.BigInteger, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     guest_name = db.Column(db.String(200), nullable=False)
     rollno = db.Column(db.String(20), nullable=False)
     mobile = db.Column(db.String(20), nullable=False)
