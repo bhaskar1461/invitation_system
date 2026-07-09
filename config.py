@@ -49,4 +49,5 @@ class Config:
     WHATSAPP_RATE_DELAY = float(os.environ.get('WHATSAPP_RATE_DELAY', 1.0))
     WHATSAPP_BATCH_LIMIT = int(os.environ.get('WHATSAPP_BATCH_LIMIT', 100))
     WHATSAPP_TOKEN = os.environ.get('WHATSAPP_TOKEN')
+    WHATSAPP_DLR_URL = os.environ.get('WHATSAPP_DLR_URL', '')
 

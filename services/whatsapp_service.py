@@ -95,12 +95,13 @@ def _build_whatsapp_payload(target_number, guest, base_url, template_id, from_nu
         filename_val = ""
         msg_type = "1"
 
+    dlr_url = app.config.get('WHATSAPP_DLR_URL', '')
     payload = {
         "apiver": "1.0",
         "whatsapp": {
             "ver": "2.0",
             "dlr": {
-                "url": ""
+                "url": dlr_url
             },
             "messages": [
                 {
