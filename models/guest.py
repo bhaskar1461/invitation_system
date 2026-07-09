@@ -1,4 +1,5 @@
 from datetime import datetime
+from flask import g
 from models import db
 
 class Guest(db.Model):
@@ -33,3 +34,40 @@ class Guest(db.Model):
             return 'Failed'
         else:
             return 'Pending'
+
+    @property
+    def whatsapp_sent(self):
+        statuses = self._get_whatsapp_statuses()
+        return statuses.get(str(self.id), {}).get('sent', False)
+
+    @property
+    def whatsapp_remarks(self):
+        statuses = self._get_whatsapp_statuses()
+        return statuses.get(str(self.id), {}).get('remarks', None)
+
+    @property
+    def whatsapp_status(self):
+        if self.whatsapp_sent:
+            return 'Sent'
+        elif self.whatsapp_remarks:
+            return 'Failed'
+        else:
+            return 'Pending'
+
+    def _get_whatsapp_statuses(self):
+        if not hasattr(g, 'whatsapp_statuses'):
+            import json
+            import os
+            from flask import current_app
+            try:
+                status_file = os.path.join(current_app.instance_path, 'whatsapp_status.json')
+                if os.path.exists(status_file):
+                    with open(status_file, 'r') as f:
+                        g.whatsapp_statuses = json.load(f)
+                else:
+                    g.whatsapp_statuses = {}
+            except Exception:
+                g.whatsapp_statuses = {}
+        return g.whatsapp_statuses
+
+

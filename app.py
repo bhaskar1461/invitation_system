@@ -77,12 +77,15 @@ def create_app(config_class=Config):
     from routes.guests import guests_bp
     from routes.upload import upload_bp
     from routes.email import email_bp
+    from routes.whatsapp import whatsapp_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(guests_bp)
     app.register_blueprint(upload_bp)
     app.register_blueprint(email_bp)
+    app.register_blueprint(whatsapp_bp)
+
 
     # Root route
     @app.route('/')

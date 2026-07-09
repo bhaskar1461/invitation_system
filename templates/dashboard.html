@@ -27,23 +27,6 @@
         </div>
     </div>
 
-    <!-- Invitations Sent -->
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-success shadow-sm h-100 py-2 border-0">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Invitations Sent</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ sent_count }}</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="bi bi-envelope-check-fill fa-2x text-gray-300 fs-2 text-success"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Checked-in Guests -->
     <div class="col-xl-3 col-md-6 mb-4">
         <div class="card border-left-info shadow-sm h-100 py-2 border-0">
@@ -61,13 +44,47 @@
         </div>
     </div>
 
-    <!-- Pending Invitations -->
+    <!-- Email Sent -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow-sm h-100 py-2 border-0">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Emails Sent</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ sent_count }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-envelope-check-fill fa-2x text-gray-300 fs-2 text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WhatsApp Sent -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success-whatsapp shadow-sm h-100 py-2 border-0" style="border-left: .25rem solid #198754 !important;">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1" style="color: #198754 !important;">WhatsApp Sent</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ whatsapp_sent_count }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-whatsapp fa-2x text-gray-300 fs-2 text-success" style="color: #198754 !important;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Pending -->
     <div class="col-xl-3 col-md-6 mb-4">
         <div class="card border-left-warning shadow-sm h-100 py-2 border-0">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Pending Invitations</div>
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Email Pending</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">{{ pending_count }}</div>
                     </div>
                     <div class="col-auto">
@@ -78,17 +95,51 @@
         </div>
     </div>
 
-    <!-- Failed Invitations -->
+    <!-- WhatsApp Pending -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow-sm h-100 py-2 border-0" style="border-left: .25rem solid #ffc107 !important;">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">WhatsApp Pending</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ whatsapp_pending_count }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-chat-dots-fill fa-2x text-gray-300 fs-2 text-warning"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Failed -->
     <div class="col-xl-3 col-md-6 mb-4">
         <div class="card border-left-danger shadow-sm h-100 py-2 border-0">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Failed Invitations</div>
+                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Email Failed</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">{{ failed_count }}</div>
                     </div>
                     <div class="col-auto">
                         <i class="bi bi-envelope-exclamation-fill fa-2x text-gray-300 fs-2 text-danger"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WhatsApp Failed -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-danger shadow-sm h-100 py-2 border-0" style="border-left: .25rem solid #dc3545 !important;">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">WhatsApp Failed</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ whatsapp_failed_count }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-exclamation-triangle-fill fa-2x text-gray-300 fs-2 text-danger"></i>
                     </div>
                 </div>
             </div>
@@ -99,7 +150,7 @@
 <div class="row">
     <!-- Recent Guests Table -->
     <div class="col-lg-8 mb-4">
-        <div class="card shadow-sm border-0 h-100">
+        <div class="card shadow-sm border-0">
             <div class="card-header bg-white py-3 d-flex align-items-center justify-content-between">
                 <h5 class="m-0 font-weight-bold text-primary"><i class="bi bi-person-lines-fill me-2"></i>Recent Guest Entries</h5>
                 <a href="{{ url_for('guests.index') }}" class="btn btn-sm btn-outline-primary">View All Guests</a>
@@ -114,6 +165,7 @@
                                     <th>Email</th>
                                     <th>Code</th>
                                     <th>Email Status</th>
+                                    <th>WhatsApp Status</th>
                                     <th>Attendance</th>
                                 </tr>
                             </thead>
@@ -126,6 +178,11 @@
                                         <td>
                                             <span class="badge {% if guest.email_status == 'Sent' %}bg-success{% elif guest.email_status == 'Failed' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
                                                 {{ guest.email_status }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge {% if guest.whatsapp_status == 'Sent' %}bg-success{% elif guest.whatsapp_status == 'Failed' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+                                                {{ guest.whatsapp_status }}
                                             </span>
                                         </td>
                                         <td>
@@ -150,7 +207,7 @@
 
     <!-- Quick Actions Panel -->
     <div class="col-lg-4 mb-4">
-        <div class="card shadow-sm border-0 h-100">
+        <div class="card shadow-sm border-0">
             <div class="card-header bg-white py-3">
                 <h5 class="m-0 font-weight-bold text-primary"><i class="bi bi-lightning-charge-fill me-2"></i>Quick Actions</h5>
             </div>
@@ -172,47 +229,81 @@
                         </div>
                     </a>
                     
-                    {% if pending_count > 0 %}
-                        <form method="POST" action="{{ url_for('email.send_pending') }}">
-                            {{ action_form.csrf_token }}
-                            <button type="submit" class="btn btn-warning w-100 text-start p-3 d-flex align-items-center text-dark">
-                                <i class="bi bi-send-fill fs-4 me-3 text-dark"></i>
-                                <div>
-                                    <div class="fw-bold text-dark">Send All Pending ({{ pending_count }})</div>
-                                    <small class="text-dark-emphasis">Email pending codes</small>
-                                </div>
+                    <div class="border-top pt-3 mt-1">
+                        <h6 class="text-secondary mb-2"><i class="bi bi-envelope-fill me-1"></i> Email Actions</h6>
+                        
+                        {% if pending_count > 0 %}
+                            <form method="POST" action="{{ url_for('email.send_pending') }}" class="mb-2">
+                                {{ action_form.csrf_token }}
+                                <button type="submit" class="btn btn-warning w-100 text-start p-2 d-flex align-items-center text-dark">
+                                    <i class="bi bi-send-fill fs-5 me-2 text-dark"></i>
+                                    <div>
+                                        <div class="fw-bold small text-dark">Send All Pending ({{ pending_count }})</div>
+                                    </div>
+                                </button>
+                            </form>
+                        {% else %}
+                            <button class="btn btn-light w-100 text-start p-2 d-flex align-items-center disabled mb-2" disabled>
+                                <i class="bi bi-send-fill fs-5 me-2 text-muted"></i>
+                                <div class="fw-bold small text-muted">Send All Pending</div>
                             </button>
-                        </form>
-                    {% else %}
-                        <button class="btn btn-light w-100 text-start p-3 d-flex align-items-center disabled" disabled>
-                            <i class="bi bi-send-fill fs-4 me-3 text-muted"></i>
-                            <div>
-                                <div class="fw-bold text-muted">Send All Pending</div>
-                                <small class="text-muted">No pending invitations</small>
-                            </div>
-                        </button>
-                    {% endif %}
-                    
-                    {% if failed_count > 0 %}
-                        <form method="POST" action="{{ url_for('email.retry_failed') }}">
-                            {{ action_form.csrf_token }}
-                            <button type="submit" class="btn btn-danger w-100 text-start p-3 d-flex align-items-center text-white">
-                                <i class="bi bi-arrow-clockwise fs-4 me-3"></i>
-                                <div>
-                                    <div class="fw-bold text-white">Retry Failed ({{ failed_count }})</div>
-                                    <small class="text-white-50">Resend failed emails</small>
-                                </div>
+                        {% endif %}
+                        
+                        {% if failed_count > 0 %}
+                            <form method="POST" action="{{ url_for('email.retry_failed') }}">
+                                {{ action_form.csrf_token }}
+                                <button type="submit" class="btn btn-danger w-100 text-start p-2 d-flex align-items-center text-white">
+                                    <i class="bi bi-arrow-clockwise fs-5 me-2"></i>
+                                    <div>
+                                        <div class="fw-bold small text-white">Retry Failed ({{ failed_count }})</div>
+                                    </div>
+                                </button>
+                            </form>
+                        {% else %}
+                            <button class="btn btn-light w-100 text-start p-2 d-flex align-items-center disabled" disabled>
+                                <i class="bi bi-arrow-clockwise fs-5 me-2 text-muted"></i>
+                                <div class="fw-bold small text-muted">Retry Failed</div>
                             </button>
-                        </form>
-                    {% else %}
-                        <button class="btn btn-light w-100 text-start p-3 d-flex align-items-center disabled" disabled>
-                            <i class="bi bi-arrow-clockwise fs-4 me-3 text-muted"></i>
-                            <div>
-                                <div class="fw-bold text-muted">Retry Failed</div>
-                                <small class="text-muted">No failed emails to retry</small>
-                            </div>
-                        </button>
-                    {% endif %}
+                        {% endif %}
+                    </div>
+
+                    <div class="border-top pt-3 mt-1">
+                        <h6 class="text-secondary mb-2"><i class="bi bi-whatsapp me-1 text-success"></i> WhatsApp Actions</h6>
+                        
+                        {% if whatsapp_pending_count > 0 %}
+                            <form method="POST" action="{{ url_for('whatsapp.send_pending') }}" class="mb-2">
+                                {{ action_form.csrf_token }}
+                                <button type="submit" class="btn btn-warning w-100 text-start p-2 d-flex align-items-center text-dark">
+                                    <i class="bi bi-send-fill fs-5 me-2 text-dark"></i>
+                                    <div>
+                                        <div class="fw-bold small text-dark">Send All Pending ({{ whatsapp_pending_count }})</div>
+                                    </div>
+                                </button>
+                            </form>
+                        {% else %}
+                            <button class="btn btn-light w-100 text-start p-2 d-flex align-items-center disabled mb-2" disabled>
+                                <i class="bi bi-send-fill fs-5 me-2 text-muted"></i>
+                                <div class="fw-bold small text-muted">Send All Pending</div>
+                            </button>
+                        {% endif %}
+                        
+                        {% if whatsapp_failed_count > 0 %}
+                            <form method="POST" action="{{ url_for('whatsapp.retry_failed') }}">
+                                {{ action_form.csrf_token }}
+                                <button type="submit" class="btn btn-danger w-100 text-start p-2 d-flex align-items-center text-white">
+                                    <i class="bi bi-arrow-clockwise fs-5 me-2"></i>
+                                    <div>
+                                        <div class="fw-bold small text-white">Retry Failed ({{ whatsapp_failed_count }})</div>
+                                    </div>
+                                </button>
+                            </form>
+                        {% else %}
+                            <button class="btn btn-light w-100 text-start p-2 d-flex align-items-center disabled" disabled>
+                                <i class="bi bi-arrow-clockwise fs-5 me-2 text-muted"></i>
+                                <div class="fw-bold small text-muted">Retry Failed</div>
+                            </button>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>

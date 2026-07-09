@@ -28,9 +28,12 @@
         <div class="col-md-3">
             <select name="status" class="form-select">
                 <option value="">All Delivery Statuses</option>
-                <option value="Pending" {% if status == 'Pending' %}selected{% endif %}>Pending</option>
-                <option value="Sent" {% if status == 'Sent' %}selected{% endif %}>Sent</option>
-                <option value="Failed" {% if status == 'Failed' %}selected{% endif %}>Failed</option>
+                <option value="Email_Pending" {% if status == 'Email_Pending' or status == 'Pending' %}selected{% endif %}>Email: Pending</option>
+                <option value="Email_Sent" {% if status == 'Email_Sent' or status == 'Sent' %}selected{% endif %}>Email: Sent</option>
+                <option value="Email_Failed" {% if status == 'Email_Failed' or status == 'Failed' %}selected{% endif %}>Email: Failed</option>
+                <option value="WhatsApp_Pending" {% if status == 'WhatsApp_Pending' %}selected{% endif %}>WhatsApp: Pending</option>
+                <option value="WhatsApp_Sent" {% if status == 'WhatsApp_Sent' %}selected{% endif %}>WhatsApp: Sent</option>
+                <option value="WhatsApp_Failed" {% if status == 'WhatsApp_Failed' %}selected{% endif %}>WhatsApp: Failed</option>
             </select>
         </div>
         
@@ -82,7 +85,7 @@
                             </th>
                             <th>
                                 <a href="{{ url_for('guests.index', search=search, status=status, sort_by='status', sort_dir='desc' if sort_by == 'status' and sort_dir == 'asc' else 'asc') }}" class="text-dark text-decoration-none">
-                                    Delivery Status 
+                                    Email Status 
                                     {% if sort_by == 'status' %}
                                         <i class="bi bi-sort-alpha-{{ 'down' if sort_dir == 'asc' else 'up' }} text-primary"></i>
                                     {% else %}
@@ -90,6 +93,7 @@
                                     {% endif %}
                                 </a>
                             </th>
+                            <th>WhatsApp Status</th>
                             <th>Attendance</th>
                             <th>Created Date</th>
                             <th class="text-end px-4">Actions</th>
@@ -105,6 +109,11 @@
                                 <td>
                                     <span class="badge {% if guest.email_status == 'Sent' %}bg-success{% elif guest.email_status == 'Failed' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
                                         {{ guest.email_status }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge {% if guest.whatsapp_status == 'Sent' %}bg-success{% elif guest.whatsapp_status == 'Failed' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+                                        {{ guest.whatsapp_status }}
                                     </span>
                                 </td>
                                 <td>
@@ -128,9 +137,18 @@
                                         <form method="POST" action="{{ url_for('email.send_single', guest_id=guest.id) }}">
                                             {{ action_form.csrf_token }}
                                             <button type="submit" class="btn btn-sm {% if guest.email_status == 'Sent' %}btn-outline-success{% elif guest.email_status == 'Failed' %}btn-danger{% else %}btn-warning text-dark{% endif %}" title="Send Invitation Email">
-                                                <i class="bi bi-send-fill"></i>
+                                                <i class="bi bi-envelope-fill"></i>
                                             </button>
                                         </form>
+
+                                        <!-- Send WhatsApp -->
+                                        <form method="POST" action="{{ url_for('whatsapp.send_single', guest_id=guest.id) }}">
+                                            {{ action_form.csrf_token }}
+                                            <button type="submit" class="btn btn-sm {% if guest.whatsapp_status == 'Sent' %}btn-outline-success{% elif guest.whatsapp_status == 'Failed' %}btn-danger{% else %}btn-warning text-dark{% endif %}" title="Send WhatsApp Invitation">
+                                                <i class="bi bi-whatsapp"></i>
+                                            </button>
+                                        </form>
+
 
                                         <!-- Edit Guest -->
                                         <a href="{{ url_for('guests.edit', guest_id=guest.id) }}" class="btn btn-sm btn-outline-primary" title="Edit Guest">

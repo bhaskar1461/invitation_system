@@ -33,8 +33,20 @@ class Config:
     SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD', os.environ.get('MAIL_PASSWORD'))
     SMTP_SENDER = os.environ.get('SMTP_SENDER', os.environ.get('MAIL_DEFAULT_SENDER', os.environ.get('SMTP_USER', os.environ.get('MAIL_USERNAME', 'invitations@sreenidhi.edu.in'))))
 
-    # Celery Background Workers & Throttling
     CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379/0')
     CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
     SMTP_BATCH_LIMIT = int(os.environ.get('SMTP_BATCH_LIMIT', 100))
     SMTP_RATE_DELAY = float(os.environ.get('SMTP_RATE_DELAY', 1.0))
+
+    # WhatsApp configurations (Unified Messaging Platform)
+    WHATSAPP_PROVIDER = os.environ.get('WHATSAPP_PROVIDER', 'simulation')
+    WHATSAPP_API_URL = os.environ.get('WHATSAPP_API_URL', 'https://103.229.250.150/unified/v2/send')
+    WHATSAPP_CLIENT_ID = os.environ.get('WHATSAPP_CLIENT_ID', 'sreenidhiclgbepfs44jy504')
+    WHATSAPP_CLIENT_PASSWORD = os.environ.get('WHATSAPP_CLIENT_PASSWORD', 'wm84r8yhj9mzp9m1yrm78fqhpmzb8on0')
+    WHATSAPP_FROM_NUMBER = os.environ.get('WHATSAPP_FROM_NUMBER', '919133386678')
+    WHATSAPP_TEMPLATE_ID = os.environ.get('WHATSAPP_TEMPLATE_ID', '1773697')
+    WHATSAPP_TEST_NUMBER = os.environ.get('WHATSAPP_TEST_NUMBER', os.environ.get('SMS_TEST_NUMBER'))
+    WHATSAPP_RATE_DELAY = float(os.environ.get('WHATSAPP_RATE_DELAY', 1.0))
+    WHATSAPP_BATCH_LIMIT = int(os.environ.get('WHATSAPP_BATCH_LIMIT', 100))
+    WHATSAPP_TOKEN = os.environ.get('WHATSAPP_TOKEN')
+

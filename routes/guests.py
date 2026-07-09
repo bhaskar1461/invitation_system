@@ -25,12 +25,36 @@ def index():
         query = query.filter((Guest.guest_name.ilike(f"%{search}%")) | (Guest.email.ilike(f"%{search}%")) | (Guest.qr_code.ilike(f"%{search}%")))
         
     # Apply status filter
-    if status == 'Sent':
+    if status in ('Sent', 'Email_Sent'):
         query = query.filter(Guest.invite_sent == True)
-    elif status == 'Failed':
+    elif status in ('Failed', 'Email_Failed'):
         query = query.filter(Guest.invite_sent == False, Guest.remarks.is_not(None))
-    elif status == 'Pending':
+    elif status in ('Pending', 'Email_Pending'):
         query = query.filter(Guest.invite_sent == False, Guest.remarks.is_(None))
+    elif status in ('WhatsApp_Sent', 'WhatsApp_Failed', 'WhatsApp_Pending'):
+        import json
+        import os
+        status_file = os.path.join(current_app.instance_path, 'whatsapp_status.json')
+        whatsapp_data = {}
+        if os.path.exists(status_file):
+            try:
+                with open(status_file, 'r') as f:
+                    whatsapp_data = json.load(f)
+            except Exception:
+                pass
+        
+        sent_ids = [int(gid) for gid, val in whatsapp_data.items() if val.get('sent', False)]
+        failed_ids = [int(gid) for gid, val in whatsapp_data.items() if not val.get('sent', False) and val.get('remarks') is not None]
+        
+        if status == 'WhatsApp_Sent':
+            query = query.filter(Guest.id.in_(sent_ids)) if sent_ids else query.filter(db.false())
+        elif status == 'WhatsApp_Failed':
+            query = query.filter(Guest.id.in_(failed_ids)) if failed_ids else query.filter(db.false())
+        elif status == 'WhatsApp_Pending':
+            all_known_ids = sent_ids + failed_ids
+            if all_known_ids:
+                query = query.filter(~Guest.id.in_(all_known_ids))
+
         
     # Apply sorting
     if sort_by == 'name':

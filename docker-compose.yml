@@ -11,7 +11,7 @@ services:
       - "8888:8000"
     environment:
       - SECRET_KEY=snist-docker-secret-key-987654321
-      - DATABASE_URL=mysql+pymysql://root:rootpassword@host.docker.internal:3307/founder_day
+      - DATABASE_URL=mysql+pymysql://root:rootpassword@mariadb-local:3306/founder_day
       - SMTP_HOST=smtp.gmail.com
       - SMTP_PORT=587
       - SMTP_USE_TLS=True
@@ -22,6 +22,15 @@ services:
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - SMTP_BATCH_LIMIT=100
       - SMTP_RATE_DELAY=1.0
+      - WHATSAPP_PROVIDER=${WHATSAPP_PROVIDER:-production}
+      - WHATSAPP_API_URL=${WHATSAPP_API_URL:-https://103.229.250.150/unified/v2/send}
+      - WHATSAPP_CLIENT_ID=${WHATSAPP_CLIENT_ID}
+      - WHATSAPP_CLIENT_PASSWORD=${WHATSAPP_CLIENT_PASSWORD}
+      - WHATSAPP_TEMPLATE_ID=${WHATSAPP_TEMPLATE_ID:-1776475}
+      - WHATSAPP_FROM_NUMBER=${WHATSAPP_FROM_NUMBER}
+      - WHATSAPP_TOKEN=${WHATSAPP_TOKEN}
+      - WHATSAPP_RATE_DELAY=${WHATSAPP_RATE_DELAY:-1.0}
+      - WHATSAPP_BATCH_LIMIT=${WHATSAPP_BATCH_LIMIT:-100}
     volumes:
       - ./static/barcodes:/app/static/barcodes
       - ./logs:/app/logs
@@ -40,7 +49,7 @@ services:
     command: celery -A app.celery worker --loglevel=info
     environment:
       - SECRET_KEY=snist-docker-secret-key-987654321
-      - DATABASE_URL=mysql+pymysql://root:rootpassword@host.docker.internal:3307/founder_day
+      - DATABASE_URL=mysql+pymysql://root:rootpassword@mariadb-local:3306/founder_day
       - SMTP_HOST=smtp.gmail.com
       - SMTP_PORT=587
       - SMTP_USE_TLS=True
@@ -51,9 +60,19 @@ services:
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - SMTP_BATCH_LIMIT=100
       - SMTP_RATE_DELAY=1.0
+      - WHATSAPP_PROVIDER=${WHATSAPP_PROVIDER:-production}
+      - WHATSAPP_API_URL=${WHATSAPP_API_URL:-https://103.229.250.150/unified/v2/send}
+      - WHATSAPP_CLIENT_ID=${WHATSAPP_CLIENT_ID}
+      - WHATSAPP_CLIENT_PASSWORD=${WHATSAPP_CLIENT_PASSWORD}
+      - WHATSAPP_TEMPLATE_ID=${WHATSAPP_TEMPLATE_ID:-1776475}
+      - WHATSAPP_FROM_NUMBER=${WHATSAPP_FROM_NUMBER}
+      - WHATSAPP_TOKEN=${WHATSAPP_TOKEN}
+      - WHATSAPP_RATE_DELAY=${WHATSAPP_RATE_DELAY:-1.0}
+      - WHATSAPP_BATCH_LIMIT=${WHATSAPP_BATCH_LIMIT:-100}
     volumes:
       - ./static/barcodes:/app/static/barcodes
       - ./logs:/app/logs
+      - db-data:/app/instance
     depends_on:
       - redis
     restart: always
