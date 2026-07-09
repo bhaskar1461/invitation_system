@@ -53,22 +53,25 @@ class ExcelService:
             # Dynamically look up optional rollno and mobile columns
             rollno_idx = None
             for idx, h in enumerate(headers_clean):
-                if h in ('rollno', 'roll no', 'roll number', 'roll'):
+                clean_h = re.sub(r'[^a-z0-9]', '', h)
+                if any(kw in clean_h for kw in ('roll', 'id', 'regno', 'admissionno')):
                     rollno_idx = idx
                     break
 
             mobile_idx = None
             for idx, h in enumerate(headers_clean):
-                if h in ('mobile', 'mobile no', 'mobile number', 'phone', 'phone number'):
+                clean_h = re.sub(r'[^a-z0-9]', '', h)
+                if any(kw in clean_h for kw in ('mobile', 'phone', 'contact', 'cell', 'phno', 'tel')):
                     mobile_idx = idx
                     break
             
-            existing_emails = {g[0].lower() for g in db.session.query(Guest.email).filter(Guest.email.is_not(None)).all()}
-            existing_codes = {g[0] for g in db.session.query(Guest.qr_code).filter(Guest.qr_code.is_not(None)).all()}
+            existing_guests = {g.email.lower(): g for g in Guest.query.filter(Guest.email.is_not(None)).all()}
+            existing_codes = {g.qr_code for g in existing_guests.values()}
             
             seen_emails = set()
             row_num = 1
             guests_to_add = []
+            guests_to_update = []
             
             def get_unique_code_in_memory():
                 import random
@@ -129,17 +132,6 @@ class ExcelService:
                     })
                     continue
                 
-                # Check for duplicates in database cache
-                if email in existing_emails:
-                    summary['skipped_duplicates'] += 1
-                    summary['skipped_details'].append({
-                        'row': row_num,
-                        'name': name,
-                        'email': email,
-                        'reason': "Guest email already registered in database"
-                    })
-                    continue
-                
                 # Extract optional fields
                 rollno = None
                 if rollno_idx is not None and len(row) > rollno_idx:
@@ -151,19 +143,33 @@ class ExcelService:
                     mobile_val = row[mobile_idx]
                     mobile = str(mobile_val).strip() if mobile_val is not None else ""
                 
+                # Check if guest already exists in database
+                if email in existing_guests:
+                    existing_guest = existing_guests[email]
+                    updated = False
+                    if mobile and existing_guest.mobile != mobile:
+                        existing_guest.mobile = mobile
+                        updated = True
+                    if rollno and existing_guest.rollno != rollno:
+                        existing_guest.rollno = rollno
+                        updated = True
+                    if updated:
+                        db.session.add(existing_guest)
+                        guests_to_update.append(existing_guest)
+                    summary['imported_count'] += 1
+                    seen_emails.add(email)
+                    continue
+                
                 # Add to file set to prevent duplicates inside sheet
                 seen_emails.add(email)
-                
-                # Add to cache to prevent duplicate in same sheet if checks happen
-                existing_emails.add(email)
                 
                 # Create Guest and append to transaction
                 try:
                     code = get_unique_code_in_memory()
                     new_guest = Guest(
                         guest_name=name.strip(),
-                        rollno=rollno,
-                        mobile=mobile,
+                        rollno=rollno or "",
+                        mobile=mobile or "",
                         email=email,
                         qr_code=code,
                         qr_image=None,
@@ -184,8 +190,8 @@ class ExcelService:
             
             wb.close()
             
-            # Commit all inserts in a single transaction
-            if guests_to_add:
+            # Commit all inserts and updates in a single transaction
+            if guests_to_add or guests_to_update:
                 try:
                     db.session.commit()
                 except Exception as commit_err:
@@ -196,14 +202,15 @@ class ExcelService:
                     summary['success'] = False
                     return summary
                 
-                # After successful commit, trigger bulk emails (caught separately so Celery broker down does not fail database import)
-                try:
-                    from services.email_service import EmailService
-                    guest_ids = [g.id for g in guests_to_add]
-                    EmailService.send_bulk_invitations(guest_ids)
-                except Exception as queue_err:
-                    current_app.logger.error(f"Failed to queue bulk emails during import: {str(queue_err)}")
-                    summary['errors'].append(f"Imported successfully, but background email dispatch failed to queue: {str(queue_err)}")
+                # After successful commit, trigger bulk emails ONLY for NEW guests
+                if guests_to_add:
+                    try:
+                        from services.email_service import EmailService
+                        guest_ids = [g.id for g in guests_to_add]
+                        EmailService.send_bulk_invitations(guest_ids)
+                    except Exception as queue_err:
+                        current_app.logger.error(f"Failed to queue bulk emails during import: {str(queue_err)}")
+                        summary['errors'].append(f"Imported successfully, but background email dispatch failed to queue: {str(queue_err)}")
                     
             summary['success'] = True
             
