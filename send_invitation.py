@@ -37,7 +37,7 @@ def send_message(recipient, guest_name):
                     "coding": "1",
                     "id": "direct_cli_send",
                     "msgtype": "3",  # Trans with Media
-                    "templateinfo": f"{TEMPLATE_ID}~{guest_name}",
+                    "templateinfo": f"{TEMPLATE_ID}~{guest_name.split()[0] if guest_name else ''}",
                     "type": "image",
                     "contenttype": "image/png",
                     "mediadata": "https://files.catbox.moe/9ngu8y.png",

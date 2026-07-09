@@ -77,7 +77,9 @@ def _build_whatsapp_payload(target_number, guest, base_url, template_id, from_nu
     elif template_id in ("1776471", "1776475"):
         # Dear {{1}}, Sreenidhi University cordially invites you to be a part of our Founder's Day celebrations.
         # Header: Image, Body: Dear {{1}}, ...
-        template_info = f"{template_id}~{guest.guest_name}"
+        # Extract first name (first word before space)
+        first_name = guest.guest_name.split()[0] if guest.guest_name else ""
+        template_info = f"{template_id}~{first_name}"
         media_type = "image"
         content_type = "image/png"
         mediadata_val = image_url
