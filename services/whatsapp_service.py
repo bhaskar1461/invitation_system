@@ -110,7 +110,6 @@ def _build_whatsapp_payload(target_number, guest, base_url, template_id, from_nu
                     "templateinfo": template_info,
                     "type": media_type,
                     "contenttype": content_type,
-                    "b_urlinfo": "",
                     "mediadata": mediadata_val,
                     "filename": filename_val,
                     "text": "",
