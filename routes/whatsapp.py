@@ -28,7 +28,8 @@ def send_single(guest_id):
 def send_pending():
     form = EmptyForm()
     if form.validate_on_submit():
-        pending_guests = Guest.query.filter(Guest.whatsapp_sent == False, Guest.whatsapp_remarks.is_(None)).all()
+        all_guests = Guest.query.all()
+        pending_guests = [g for g in all_guests if not g.whatsapp_sent and not g.whatsapp_remarks]
         if not pending_guests:
             flash("No pending WhatsApp invitations to send.", "info")
             return redirect(request.referrer or url_for('guests.index'))
@@ -49,7 +50,8 @@ def send_pending():
 def retry_failed():
     form = EmptyForm()
     if form.validate_on_submit():
-        failed_guests = Guest.query.filter(Guest.whatsapp_sent == False, Guest.whatsapp_remarks.is_not(None)).all()
+        all_guests = Guest.query.all()
+        failed_guests = [g for g in all_guests if not g.whatsapp_sent and g.whatsapp_remarks]
         if not failed_guests:
             flash("No failed WhatsApp invitations to retry.", "info")
             return redirect(request.referrer or url_for('guests.index'))
