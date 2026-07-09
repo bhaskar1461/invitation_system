@@ -5,6 +5,7 @@ import time
 import base64
 import urllib.parse
 import urllib.request
+import urllib.error
 from datetime import datetime
 from flask import current_app
 from celery import shared_task
@@ -218,6 +219,13 @@ def send_whatsapp_task(self, guest_id, base_url):
         ssl_ctx.check_hostname = False
         ssl_ctx.verify_mode = ssl.CERT_NONE
 
+        app.logger.info("=== CALLING WHATSAPP API (SINGLE) ===")
+        app.logger.info(f"Provider: {provider}")
+        app.logger.info(f"API URL: {api_url}")
+        app.logger.info(f"Target: {target_number}")
+        app.logger.info(f"Template ID: {template_id}")
+        app.logger.info(f"Payload: {json.dumps(payload, indent=2)}")
+
         req = urllib.request.Request(api_url, data=json_data, headers=headers, method="POST")
         with urllib.request.urlopen(req, timeout=15, context=ssl_ctx) as response:
             resp_body = response.read().decode("utf-8")
@@ -232,6 +240,15 @@ def send_whatsapp_task(self, guest_id, base_url):
         WhatsAppService._log_outcome(guest, 'Sent')
         return True
         
+    except urllib.error.HTTPError as he:
+        err_body = he.read().decode('utf-8', errors='replace')
+        error_msg = f"WhatsApp API HTTP Error {he.code}: {err_body}"
+        app.logger.error(error_msg)
+        try:
+            self.retry(exc=he)
+        except Exception:
+            WhatsAppService._log_outcome(guest, 'Failed', f"Max retries exceeded. HTTP Error: {error_msg}")
+            return False
     except Exception as e:
         error_msg = f"WhatsApp API transmission failed: {str(e)}"
         app.logger.error(error_msg)
@@ -336,6 +353,13 @@ def send_whatsapp_bulk_task(self, guest_ids, base_url):
             }
             
             try:
+                app.logger.info("=== CALLING WHATSAPP API (BULK) ===")
+                app.logger.info(f"Provider: {provider}")
+                app.logger.info(f"API URL: {api_url}")
+                app.logger.info(f"Target: {target_number}")
+                app.logger.info(f"Template ID: {template_id}")
+                app.logger.info(f"Payload: {json.dumps(payload, indent=2)}")
+
                 req = urllib.request.Request(api_url, data=json_data, headers=headers, method="POST")
                 with urllib.request.urlopen(req, timeout=15, context=ssl_ctx) as response:
                     resp_body = response.read().decode("utf-8")
@@ -343,6 +367,11 @@ def send_whatsapp_bulk_task(self, guest_ids, base_url):
                         raise RuntimeError(f"API returned error: {resp_body}")
                 app.logger.info(f"WhatsApp sent successfully to {target_number} (bulk)")
                 WhatsAppService._log_outcome(guest, 'Sent')
+            except urllib.error.HTTPError as he:
+                err_body = he.read().decode('utf-8', errors='replace')
+                error_msg = f"WhatsApp bulk API HTTP Error {he.code}: {err_body}"
+                app.logger.error(error_msg)
+                WhatsAppService._log_outcome(guest, 'Failed', error_msg)
             except Exception as e:
                 error_msg = f"WhatsApp bulk transmission failed: {str(e)}"
                 app.logger.error(error_msg)
