@@ -40,7 +40,7 @@ def send_message(recipient, guest_name):
                     "templateinfo": f"{TEMPLATE_ID}~{guest_name}",
                     "type": "image",
                     "contenttype": "image/png",
-                    "mediadata": "https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg.png",
+                    "mediadata": "https://files.catbox.moe/9ngu8y.png",
                     "filename": "pass.png",
                     "text": "",
                     "addresses": [
