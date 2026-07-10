@@ -9,7 +9,7 @@ import sys
 URL = "https://103.229.250.150/unified/v2/send"
 TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJJbmZpbml0byIsImlhdCI6MTczNDU5NjcyNSwic3ViIjoic3JlZW5pZGhpYmR2dml5cTRnNTRkOGUzIn0.9nsgFzRXqeTXyUwtXOADX6pP1G50cOsc40pwn0NVyS4"
 FROM_NUMBER = "918712010771"
-TEMPLATE_ID = "1776475"
+TEMPLATE_ID = "1776508"
 
 def send_message(recipient, guest_name):
     # Normalize phone: strip leading '0' or spaces, ensure '91' prefix
@@ -37,7 +37,7 @@ def send_message(recipient, guest_name):
                     "coding": "1",
                     "id": "direct_cli_send",
                     "msgtype": "3",  # Trans with Media
-                    "templateinfo": f"{TEMPLATE_ID}~{guest_name.split()[0] if guest_name else ''}",
+                    "templateinfo": f"{TEMPLATE_ID}~{guest_name.split()[0] if guest_name else ''}~you to be a part of our Founder's Day celebrations~personalized  digital entry pass",
                     "type": "image",
                     "contenttype": "image/png",
                     "mediadata": "https://files.catbox.moe/9ngu8y.png",

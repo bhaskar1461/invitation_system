@@ -74,6 +74,17 @@ def _build_whatsapp_payload(target_number, guest, base_url, template_id, from_nu
         mediadata_val = ""
         filename_val = ""
         msg_type = "1"
+    elif template_id == "1776508":
+        # Dear {{1}}, You are cordially invited to {{2}} with Sreenidhi University. The {{3}}  attached above.
+        # Header: Image, Body: Dear {{1}}, ...
+        # Extract first name (first word before space)
+        first_name = guest.guest_name.split()[0] if guest.guest_name else ""
+        template_info = f"{template_id}~{first_name}~you to be a part of our Founder's Day celebrations~personalized  digital entry pass"
+        media_type = "image"
+        content_type = "image/png"
+        mediadata_val = image_url
+        filename_val = "pass.png"
+        msg_type = "3"  # Trans with Media
     elif template_id in ("1776471", "1776475"):
         # Dear {{1}}, Sreenidhi University cordially invites you to be a part of our Founder's Day celebrations.
         # Header: Image, Body: Dear {{1}}, ...
@@ -179,6 +190,9 @@ def send_whatsapp_task(self, guest_id, base_url):
             msg_text = f"Dear {guest.guest_name}, custom invitation. QR Code: {guest.qr_code}"
         elif template_id in ("1776471", "1776475"):
             msg_text = f"Dear {guest.guest_name}, Sreenidhi University cordially invites you to be a part of our Founder's Day celebrations. Please find your personalized digital entry pass below. Show this QR code at the entrance for verification. [Header Image: {image_url}]"
+        elif template_id == "1776508":
+            first_name = guest.guest_name.split()[0] if guest.guest_name else ""
+            msg_text = f"Dear {first_name}, You are cordially invited to you to be a part of our Founder's Day celebrations with Sreenidhi University. The personalized  digital entry pass attached above. [Header Image: {image_url}]"
         else:
             msg_text = f"Dear {guest.guest_name}, you are cordially invited to Sreenidhi University Founder's Day. Passcode: {guest.qr_code}. View entry pass here: {ticket_url}. - SNIST"
             
@@ -326,6 +340,9 @@ def send_whatsapp_bulk_task(self, guest_ids, base_url):
                     msg_text = f"Dear {guest.guest_name}, custom invitation. QR Code: {guest.qr_code}"
                 elif template_id in ("1776471", "1776475"):
                     msg_text = f"Dear {guest.guest_name}, Sreenidhi University cordially invites you to be a part of our Founder's Day celebrations. Please find your personalized digital entry pass below. Show this QR code at the entrance for verification. [Header Image: {image_url}]"
+                elif template_id == "1776508":
+                    first_name = guest.guest_name.split()[0] if guest.guest_name else ""
+                    msg_text = f"Dear {first_name}, You are cordially invited to you to be a part of our Founder's Day celebrations with Sreenidhi University. The personalized  digital entry pass attached above. [Header Image: {image_url}]"
                 else:
                     msg_text = f"Dear {guest.guest_name}, you are cordially invited to Sreenidhi University Founder's Day. Passcode: {guest.qr_code}. View entry pass here: {ticket_url}. - SNIST"
                     
